@@ -12,7 +12,6 @@ module Vidibus
         field :version_number, :type => Integer, :default => 1
 
         after_initialize :original_attributes
-        # before_update :store_version
         before_update :reset_version_cache
 
         mattr_accessor :versioned_attributes, :unversioned_attributes, :versioning_options
@@ -184,6 +183,7 @@ module Vidibus
      end
 
       # Returns the version object:
+      #
       # * If a version is wanted, that version will be selected or instantiated and returned.
       # * If an editing time has been defined which has not yet passed, the last version will be returned.
       # * Otherwise a new version will be instantiated.
@@ -193,7 +193,7 @@ module Vidibus
           if version_cache.wanted_version_number
             obj = versions.where(:number => version_cache.wanted_version_number).first
             unless obj or version_cache.self_version
-              #versions.to_a # IMPORTANT! prefetch versions before building a new one
+              # versions.to_a # TODO: prefetch versions before building a new one?
               obj = versions.build(
                 :number => version_cache.wanted_version_number,
                 :versioned_attributes => versioned_attributes,
@@ -202,7 +202,7 @@ module Vidibus
             obj
           else
             if editing_time = self.class.versioning_options[:editing_time]
-              last_version = versions.timeline.last # TODO: get the last version by time stamp
+              last_version = versions.timeline.last
             end
             if last_version and last_version.updated_at > Time.now - editing_time
               last_version
@@ -213,6 +213,7 @@ module Vidibus
         end
       end
 
+      # Returns the next available version number.
       def new_version_number
         version_cache.new_version_number ||= begin
           latest_version = versions.desc(:number).limit(1).first
