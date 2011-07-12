@@ -4,12 +4,12 @@ module Vidibus
       extend ActiveSupport::Concern
 
       included do
+        include ::Mongoid::Timestamps
         include Vidibus::Uuid::Mongoid
 
         has_many :versions, :as => :versioned, :class_name => "Vidibus::Versioning::Version", :dependent => :destroy
 
         field :version_number, :type => Integer, :default => 1
-        field :updated_at, :type => Time
 
         after_initialize :original_attributes
         # before_update :store_version
