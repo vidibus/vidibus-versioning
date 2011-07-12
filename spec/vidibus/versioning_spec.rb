@@ -18,13 +18,22 @@ describe Vidibus::Versioning do
   end
 
   describe "updating a versioned object" do
-    it "should not create a version if update fails" do
-      dont_allow(article).store_version
-      article.update_attributes(:title => nil).should be_false
-      article.versions.should have(:no).versions
+    it "should create a new version" do
+      mock.any_instance_of(Vidibus::Versioning::Version).save {true}
+      stub.any_instance_of(Vidibus::Versioning::Version).number {1}
+      article.update_attributes(:title => "something")
     end
 
-    it "should not create a version if none of the versioned attributes were changed"
+    it "should not create a version if update fails" do
+      dont_allow.any_instance_of(Vidibus::Versioning::Version).save {true}
+      article.update_attributes(:title => nil)
+    end
+
+    it "should create a version even if none of the versioned attributes were changed (useful for future versions)" do
+      mock.any_instance_of(Vidibus::Versioning::Version).save {true}
+      stub.any_instance_of(Vidibus::Versioning::Version).number {1}
+      article.update_attributes(:title => "title 1")
+    end
 
     context "with only one version" do
       before {article.update_attributes(:title => "title 2", :text => "text 2")}
