@@ -194,7 +194,10 @@ module Vidibus
             obj = versions.where(:number => version_cache.wanted_version_number).first
             unless obj or version_cache.self_version
               #versions.to_a # IMPORTANT! prefetch versions before building a new one
-              obj = versions.build(:number => version_cache.wanted_version_number, :versioned_attributes => versioned_attributes)
+              obj = versions.build(
+                :number => version_cache.wanted_version_number,
+                :versioned_attributes => versioned_attributes,
+                :created_at => updated_at_was)
             end
             obj
           else
@@ -204,7 +207,7 @@ module Vidibus
             if last_version and last_version.updated_at > Time.now - editing_time
               last_version
             else
-              versions.build
+              versions.build(:created_at => updated_at_was)
             end
           end
         end

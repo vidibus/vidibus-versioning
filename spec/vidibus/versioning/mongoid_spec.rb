@@ -315,10 +315,25 @@ describe Vidibus::Versioning::Mongoid do
   end
 
   describe "#updated_at" do
-    it "should contain the time the record was edited"
+    let(:book_with_two_versions) do
+      stub_time("2011-07-01 00:01 UTC") {book}
+      stub_time("2011-07-01 00:02 UTC") {book.update_attributes(:title => "title 2", :text => "text 2")}
+      book
+    end
+
+    before do
+      book_with_two_versions
+      stub_time("2011-07-01 00:03 UTC")
+    end
+
+    it "should contain the time the record was edited" do
+      book_with_two_versions.updated_at.should eql(Time.parse("2011-07-01 00:02 UTC"))
+    end
 
     context "with a loaded version" do
-      it "should return the time the version was created at"
+      it "should return the time the version was created at" do
+        book_with_two_versions.version(1).updated_at.should eql(Time.parse("2011-07-01 00:01 UTC"))
+      end
     end
   end
 
