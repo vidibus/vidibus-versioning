@@ -81,15 +81,15 @@ module Vidibus
         save!
       end
 
-      # Calls #version!(:previous, steps) and migrate!
-      def undo!(steps = 1)
-        version!(:previous, steps)
+      # Calls #version!(:previous) and migrate!
+      def undo!
+        version!(:previous)
         migrate!
       end
 
-      # Calls #version!(:next, steps) and migrate!
-      def redo!(steps = 1)
-        version!(:next, steps)
+      # Calls #version!(:next) and migrate!
+      def redo!
+        version!(:next)
         migrate!
       end
 
@@ -163,13 +163,12 @@ module Vidibus
       def set_version_args(*args)
         version_cache.version_args = args
         version_cache.wanted_attributes = args.extract_options!
-        wanted_version_number, version_cache.version_steps = args
-        version_cache.version_steps = version_cache.version_steps ? version_cache.version_steps.to_i : 1
+        wanted_version_number = args.first
 
         version_cache.wanted_version_number = case wanted_version_number
         when :new       then new_version_number
-        when :next      then version_cache.version_steps + version_number
-        when :previous  then - version_cache.version_steps + version_number
+        when :next      then version_number + 1
+        when :previous  then version_number - 1
         else
           wanted_version_number.to_i
         end
@@ -229,7 +228,6 @@ module Vidibus
           :new_version_number,
           :version_obj,
           :version_args,
-          :version_steps,
           :original_version_obj,
           :self_version
         ).new

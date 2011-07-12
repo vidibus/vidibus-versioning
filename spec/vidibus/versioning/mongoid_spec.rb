@@ -124,24 +124,6 @@ describe Vidibus::Versioning::Mongoid do
       end
     end
 
-    context "with arguments :next, 2" do
-      context "on a rolled-back record with three versions" do
-        before {book_with_three_versions.migrate!(1)}
-
-        it "should return a stored instance" do
-          book_with_three_versions.version(:next, 2).should_not be_a_new_version
-        end
-
-        it "should apply the object's versioned attributes" do
-          book_with_three_versions.version(:next, 2).title.should eql("title 3")
-        end
-
-        it "should apply the version number 3" do
-          book_with_three_versions.version(:next, 2).version_number.should eql(3)
-        end
-      end
-    end
-
     context "with argument :previous" do
       it "should return version 1, if current version is 2" do
         book_with_two_versions.version(:previous).version_number.should eql(1)
@@ -150,12 +132,6 @@ describe Vidibus::Versioning::Mongoid do
       it "should return a copy of self, if current version is 1" do
         book_with_two_versions.migrate!(1)
         book.version(:previous).version_number.should eql(1)
-      end
-    end
-
-    context "with arguments :previous, 2" do
-      it "should set @wanted_version to 1, if current version is 3" do
-        book_with_three_versions.version(:previous, 2).version_number.should eql(1)
       end
     end
 
@@ -271,38 +247,18 @@ describe Vidibus::Versioning::Mongoid do
   end
 
   describe "#undo!" do
-    context "without arguments" do
-      it "should call #version!(:previous, 1) and #migrate!" do
-        mock(book).version!(:previous, 1)
-        mock(book).migrate!
-        book.undo!
-      end
-    end
-
-    context "with argument 2" do
-      it "should call #version!(:previous, 2) and #migrate!" do
-        mock(book).version!(:previous, 2)
-        mock(book).migrate!
-        book.undo!(2)
-      end
+    it "should call #version!(:previous) and #migrate!" do
+      mock(book).version!(:previous)
+      mock(book).migrate!
+      book.undo!
     end
   end
 
   describe "#redo!" do
-    context "without arguments and #migrate!" do
-      it "should call #version!(:next, 1)" do
-        mock(book).version!(:next, 1)
-        mock(book).migrate!
-        book.redo!
-      end
-    end
-
-    context "with argument 2" do
-      it "should call #version!(:next, 2) and #migrate!" do
-        mock(book).version!(:next, 2)
-        mock(book).migrate!
-        book.redo!(2)
-      end
+    it "should call #version!(:next) and #migrate!" do
+      mock(book).version!(:next)
+      mock(book).migrate!
+      book.redo!
     end
   end
 
