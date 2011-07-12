@@ -21,22 +21,6 @@ module Vidibus
 
       scope :timeline, desc(:created_at)
 
-      class << self
-
-        # TODO
-        def next
-          version = 1
-          if latest = desc(:version).limit(1).first
-            version += latest.number
-          end
-          new(:number => number)
-        end
-
-        def find_or_build(number)
-
-        end
-      end
-
       def past?
         @is_past ||= created_at && created_at < Time.now
       end
