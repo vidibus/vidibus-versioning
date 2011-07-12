@@ -263,7 +263,21 @@ describe Vidibus::Versioning::Mongoid do
   end
 
   describe "#version_object" do
-    it "should be spec'd"
+    it "should be nil by default" do
+      book.version_object.should be_nil
+    end
+
+    it "should return the currently loaded version object" do
+      book_with_two_versions.version(1).version_object.should eql(book_with_two_versions.versions.first)
+    end
+
+    it "should be nil for the current version" do
+      book_with_two_versions.version(2).version_object.should be_nil
+    end
+
+    it "should return a new version object for a new version" do
+      book_with_two_versions.version(:new).version_object.should be_a_new_record
+    end
   end
 
   describe "#reload_version" do
