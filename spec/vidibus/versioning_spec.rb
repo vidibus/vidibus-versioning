@@ -34,6 +34,24 @@ describe Vidibus::Versioning do
       article.update_attributes(:title => "title 1")
     end
 
+    it "should set the previous update time as creation time of the new version" do
+      past = stub_time("2011-01-01 01:00")
+      article
+      stub_time("2011-01-01 02:00")
+      article.update_attributes(:title => "title 2")
+      article.reload.versions.should have(1).version
+      article.versions.first.created_at.should eql(past)
+    end
+
+    it "should apply a given update time as creation time of version" do
+      future = Time.parse("2100-01-01 00:00 UTC")
+      version = article.version(:next)
+      version.update_attributes(:title => "THE FUTURE!", :updated_at => future)
+      article.reload
+      article.versions.should have(1).version
+      article.versions.first.created_at.should eql(future)
+    end
+
     context "with only one version" do
       before {article.update_attributes(:title => "title 2", :text => "text 2")}
 

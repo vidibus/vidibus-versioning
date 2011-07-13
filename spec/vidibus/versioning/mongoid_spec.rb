@@ -235,13 +235,55 @@ describe Vidibus::Versioning::Mongoid do
       end
     end
 
-    context "on an already migrated record" do
-      before {book_with_two_versions.migrate!(1)}
-
-      it "should not create a new version" do
-        book_with_two_versions.reload.migrate!(2)
+    context "on a rolled back record" do
+      before do
+        stub_time("2011-07-01 01:00 UTC")
+        book
+        stub_time("2011-07-01 02:00 UTC")
+        book.update_attributes(:title => "title 2", :text => "text 2")
+        stub_time("2011-07-01 04:00 UTC")
+        book_with_two_versions.undo!
+        stub_time("2011-07-01 04:00 UTC")
         book_with_two_versions.reload
+      end
+
+      it "should not create a new version object" do
         book_with_two_versions.versions.should have(2).versions
+        book_with_two_versions.migrate!(:next)
+        book_with_two_versions.reload.versions.should have(2).versions
+      end
+
+      it "should ensure that each version's creation time reflects the time of update" do
+        book_with_two_versions.migrate!(:next)
+        book_with_two_versions.versions[0].created_at.should eql(Time.parse("2011-07-01 01:00 UTC").localtime)
+        book_with_two_versions.versions[1].created_at.should eql(Time.parse("2011-07-01 02:00 UTC").localtime)
+      end
+    end
+
+    context "on a record containing a future version" do
+      before do
+        stub_time("2011-07-01 01:00 UTC")
+        book
+        stub_time("2011-07-01 02:00 UTC")
+        version = book.version(:next)
+        version.update_attributes!(:title => "THE FUTURE!", :updated_at => Time.parse("2100-01-01 00:00 UTC"))
+        stub_time("2011-07-01 03:00 UTC")
+        book.reload
+      end
+
+      it "should create a new version object of the old version" do
+        book.versions.should have(1).version
+        book.migrate!(:next)
+        book.versions.should have(2).versions
+        book.versions.last.number.should eql(1)
+        book.versions.last.versioned_attributes["title"].should eql("title 1")
+      end
+
+      it "should ensure that each version's creation time reflects the time of update" do
+        book.migrate!(:next)
+        book.reload
+        book.versions[0].created_at.should eql(Time.parse("2100-01-01 00:00 UTC").localtime)
+        book.versions[1].created_at.should eql(Time.parse("2011-07-01 01:00 UTC").localtime)
       end
     end
   end

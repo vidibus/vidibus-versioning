@@ -182,9 +182,12 @@ module Vidibus
 
       # Finds or builds a version object containing the record's current attributes.
       def set_original_version_obj
-         _version_attributes = {:number => version_number_was}
-        version_cache.original_version_obj = versions.where(_version_attributes).first || versions.build(_version_attributes)
-        version_cache.original_version_obj.versioned_attributes = original_attributes
+        criteria = {:number => version_number_was}
+        version_cache.original_version_obj = versions.where(criteria).first || versions.build(criteria)
+        version_cache.original_version_obj.tap do |obj|
+          obj.versioned_attributes = original_attributes
+          obj.created_at = updated_at_was if obj.new_record?
+        end
      end
 
       # Returns the version object:
@@ -254,7 +257,9 @@ module Vidibus
         if version_cache.original_version_obj
           version_cache.original_version_obj.save!
         elsif version_cache.wanted_version_number
-          saved = version_obj.update_attributes(:versioned_attributes => versioned_attributes) if version_obj
+          if version_obj
+            saved = version_obj.update_attributes(:versioned_attributes => versioned_attributes, :created_at => updated_at)
+          end
           return saved unless version_cache.self_version
         else
           version_obj.update_attributes!(:versioned_attributes => original_attributes)
