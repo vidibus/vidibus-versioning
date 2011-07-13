@@ -211,8 +211,12 @@ describe Vidibus::Versioning::Mongoid do
         book_with_two_versions.version(1).migrate!.should be_nil
       end
 
-      it "should raise an ArgumentError unless a version has been loaded or given" do
+      it "should raise a MigrationError unless a version has been loaded or given" do
         expect {book.migrate!}.to raise_error(Vidibus::Versioning::MigrationError)
+      end
+
+      it "should raise a MigrationError if the version number is the current one" do
+        expect {book_with_two_versions.version(2).migrate!}.to raise_error(Vidibus::Versioning::MigrationError)
       end
     end
 
@@ -222,6 +226,10 @@ describe Vidibus::Versioning::Mongoid do
         book_with_two_versions.reload
         book_with_two_versions.version_number.should eql(1)
         book_with_two_versions.versioned_attributes.should eql(book_with_two_versions.versions.first.versioned_attributes)
+      end
+
+      it "should raise a MigrationError if the version number is the current one" do
+        expect {book.migrate!(1)}.to raise_error(Vidibus::Versioning::MigrationError)
       end
     end
 

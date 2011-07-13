@@ -72,6 +72,7 @@ module Vidibus
       def migrate!(number = nil)
         raise(MigrationError, "no version given") unless number or version_cache.wanted_version_number
         version!(number) if number and number != version_cache.wanted_version_number
+        raise(MigrationError, "cannot migrate to current version") if version_cache.self_version
 
         set_original_version_obj
 
