@@ -18,7 +18,7 @@ describe Vidibus::Versioning do
   end
 
   describe "updating a versioned object" do
-    it "should create a new version" do
+    it "should create a new version if attributes were changed" do
       mock.any_instance_of(Vidibus::Versioning::Version).save {true}
       stub.any_instance_of(Vidibus::Versioning::Version).number {1}
       article.update_attributes(:title => "something")
@@ -29,9 +29,8 @@ describe Vidibus::Versioning do
       article.update_attributes(:title => nil)
     end
 
-    it "should create a version even if none of the versioned attributes were changed (useful for future versions)" do
-      mock.any_instance_of(Vidibus::Versioning::Version).save {true}
-      stub.any_instance_of(Vidibus::Versioning::Version).number {1}
+    it "should not create a version unless any of the versioned attributes were changed" do
+      dont_allow.any_instance_of(Vidibus::Versioning::Version).save {true}
       article.update_attributes(:title => "title 1")
     end
 

@@ -150,6 +150,11 @@ module Vidibus
         @original_attributes ||= versioned_attributes
       end
 
+      # Returns true if versioned attributes were changed.
+      def versioned_attributes_changed?
+        versioned_attributes != original_attributes
+      end
+
       # Returns original attributes with attributes of version object and wanted attributes merged in.
       def version_attributes
         # TODO: Setting the following line will cause DelayedJob to loop endlessly. The same should happen if an embedded document is defined as versioned_attribute!
@@ -245,6 +250,7 @@ module Vidibus
       #
       def persist_version
         return if new_record?
+        return unless versioned_attributes_changed?
         if version_cache.original_version_obj
           version_cache.original_version_obj.save!
         elsif version_cache.wanted_version_number
