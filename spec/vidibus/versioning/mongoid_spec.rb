@@ -274,7 +274,7 @@ describe Vidibus::Versioning::Mongoid do
         book
         stub_time("2011-07-01 02:00 UTC")
         version = book.version(:next)
-        version.update_attributes!(:title => "THE FUTURE!", :updated_at => Time.parse("2100-01-01 00:00 UTC"))
+        version.update_attributes!(:title => "THE FUTURE!", :updated_at => Time.parse("2012-01-01 00:00 UTC"))
         stub_time("2011-07-01 03:00 UTC")
         book.reload
       end
@@ -290,7 +290,7 @@ describe Vidibus::Versioning::Mongoid do
       it "should ensure that each version's creation time reflects the time of update" do
         book.migrate!(:next)
         book.reload
-        book.versions[0].created_at.should eql(Time.parse("2100-01-01 00:00 UTC").localtime)
+        book.versions[0].created_at.should eql(Time.parse("2012-01-01 00:00 UTC").localtime)
         book.versions[1].created_at.should eql(Time.parse("2011-07-01 01:00 UTC").localtime)
       end
     end

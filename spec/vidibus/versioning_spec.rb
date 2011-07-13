@@ -43,7 +43,7 @@ describe Vidibus::Versioning do
     end
 
     it "should apply a given update time as creation time of version" do
-      future = Time.parse("2100-01-01 00:00 UTC")
+      future = Time.parse("2012-01-01 00:00 UTC")
       version = book.version(:next)
       version.update_attributes(:title => "THE FUTURE!", :updated_at => future)
       book.reload
@@ -159,7 +159,7 @@ describe Vidibus::Versioning do
       context "and a future version" do
         before do
           stub_time("2011-06-25 13:10")
-          article.update_attributes(:title => "THIS IS THE FUTURE!", :updated_at => Time.parse("2100-01-01 00:00"))
+          article.update_attributes(:title => "THIS IS THE FUTURE!", :updated_at => Time.parse("2012-01-01 00:00"))
           article.reload
         end
 
