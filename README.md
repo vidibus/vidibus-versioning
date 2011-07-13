@@ -1,6 +1,6 @@
 # Vidibus::Versioning [![](http://travis-ci.org/vidibus/vidibus-versioning.png)](http://travis-ci.org/vidibus/vidibus-versioning) [![](http://stillmaintained.com/vidibus/vidibus-versioning.png)](http://stillmaintained.com/vidibus/vidibus-versioning)
 
-Advanced versioning for Mongoid models.
+Vidibus::Versioning provides advanced versioning for Mongoid models including support for future and editable versions.
 
 This gem is part of [Vidibus](http://vidibus.org), an open source toolset for building distributed (video) applications.
 
