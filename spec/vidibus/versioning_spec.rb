@@ -1,19 +1,18 @@
 require "spec_helper"
 
 describe Vidibus::Versioning do
-  let(:article_attributes) {{:title => "title 1", :text => "text 1"}}
-  let(:new_article) {Article.new(article_attributes)}
-  let(:article) {Article.create(article_attributes)}
+  let(:article) {Article.create(:title => "title 1", :text => "text 1")}
+  let(:book) {Book.create(:title => "title 1", :text => "text 1")}
 
   describe "creating a versioned object" do
-    before {article}
+    before {book}
 
     it "should not create a version" do
-      article.versions.should have(:no).versions
+      book.versions.should have(:no).versions
     end
 
     it "should set version number 1" do
-      article.version_number.should eql(1)
+      book.version_number.should eql(1)
     end
   end
 
@@ -21,81 +20,109 @@ describe Vidibus::Versioning do
     it "should create a new version if attributes were changed" do
       mock.any_instance_of(Vidibus::Versioning::Version).save {true}
       stub.any_instance_of(Vidibus::Versioning::Version).number {1}
-      article.update_attributes(:title => "something")
+      book.update_attributes(:title => "something")
     end
 
     it "should not create a version if update fails" do
       dont_allow.any_instance_of(Vidibus::Versioning::Version).save {true}
-      article.update_attributes(:title => nil)
+      book.update_attributes(:title => nil)
     end
 
     it "should not create a version unless any of the versioned attributes were changed" do
       dont_allow.any_instance_of(Vidibus::Versioning::Version).save {true}
-      article.update_attributes(:title => "title 1")
+      book.update_attributes(:title => "title 1")
     end
 
     it "should set the previous update time as creation time of the new version" do
       past = stub_time("2011-01-01 01:00")
-      article
+      book
       stub_time("2011-01-01 02:00")
-      article.update_attributes(:title => "title 2")
-      article.reload.versions.should have(1).version
-      article.versions.first.created_at.should eql(past)
+      book.update_attributes(:title => "title 2")
+      book.reload.versions.should have(1).version
+      book.versions.first.created_at.should eql(past)
     end
 
     it "should apply a given update time as creation time of version" do
       future = Time.parse("2100-01-01 00:00 UTC")
-      version = article.version(:next)
+      version = book.version(:next)
       version.update_attributes(:title => "THE FUTURE!", :updated_at => future)
-      article.reload
-      article.versions.should have(1).version
-      article.versions.first.created_at.should eql(future)
+      book.reload
+      book.versions.should have(1).version
+      book.versions.first.created_at.should eql(future)
     end
 
     context "with only one version" do
-      before {article.update_attributes(:title => "title 2", :text => "text 2")}
+      before {book.update_attributes(:title => "title 2")}
 
       it "should create the first version object" do
-        article.versions.should have(1).version
+        book.versions.should have(1).version
       end
 
       it "should store the previous attributes as versioned ones" do
-        article.versions.last.versioned_attributes.should eql("title" => "title 1", "text" => "text 1")
+        book.versions.last.versioned_attributes.should eql("title" => "title 1", "text" => "text 1")
       end
 
       it "should set 2 as version number on versioned object" do
-        article.version_number.should eql(2)
+        book.version_number.should eql(2)
       end
 
       it "should set 1 as version number on version object" do
-        article.versions.last.number.should eql(1)
+        book.versions.last.number.should eql(1)
       end
     end
 
-    context "with two versions" do
-      context "and an editing time set to 300 seconds" do
-        it "should have Article.versioning_options set properly" do
-          Article.versioning_options[:editing_time].should eql(300)
+    context "with an editing time set to 300 seconds" do
+      it "should have Article.versioning_options set properly" do
+        Article.versioning_options[:editing_time].should eql(300)
+      end
+
+      context "without versions" do
+        before do
+          stub_time("2011-06-25 13:10")
+          article
+        end
+
+        context "before editing time has passed" do
+          before do
+            stub_time("2011-06-25 13:11")
+            article.update_attributes(:text => "text 3")
+            article.reload
+          end
+
+          it "should update the versioned object" do
+            article.text.should eql("text 3")
+          end
+
+          it "should not create a version object" do
+            article.versions.should have(:no).versions
+          end
+        end
+      end
+
+      context "and several past versions" do
+        before do
+          stub_time("2011-01-01 00:00")
+          article
+          stub_time("2011-01-01 01:00")
+          article.update_attributes(:title => "old title", :text => "old text")
+          stub_time("2011-06-25 13:10")
+          article.update_attributes(:title => "title 2", :text => "text 2")
         end
 
         context "an update" do
-          before do
-            stub_time("2011-06-25 13:10")
-            article.update_attributes(:title => "title 2", :text => "text 2")
-          end
-
           context "before editing time has passed" do
             before do
               stub_time("2011-06-25 13:11")
               article.update_attributes(:text => "text 3")
+              article.reload
             end
 
             it "should update the versioned object" do
               article.text.should eql("text 3")
             end
 
-            it "should have only one version object" do
-              article.versions.should have(1).version
+            it "should not create another version object" do
+              article.versions.should have(2).versions
             end
           end
 
@@ -103,26 +130,69 @@ describe Vidibus::Versioning do
             before do
               stub_time("2011-06-25 13:16")
               article.update_attributes(:text => "text 3")
+              article.reload
             end
 
             it "should update the versioned object" do
               article.text.should eql("text 3")
             end
 
-            it "should create the second version object" do
-              article.versions.should have(2).versions
+            it "should create a new version object" do
+              article.versions.should have(3).versions
             end
 
             it "should store the previous attributes as versioned ones" do
-              article.versions.last.versioned_attributes.should eql("title" => "title 2", "text" => "text 2")
+              article.versions.last.versioned_attributes["title"].should eql("title 2")
             end
 
-            it "should set version number 3 on versioned object" do
-              article.version_number.should eql(3)
+            it "should set version number 4 on versioned object" do
+              article.version_number.should eql(4)
             end
 
-            it "should set version number 2 on version object" do
-              article.versions.last.number.should eql(2)
+            it "should set version number 3 on version object" do
+              article.versions.last.number.should eql(3)
+            end
+          end
+        end
+      end
+
+      context "and a future version" do
+        before do
+          stub_time("2011-06-25 13:10")
+          article.update_attributes(:title => "THIS IS THE FUTURE!", :updated_at => Time.parse("2100-01-01 00:00"))
+          article.reload
+        end
+
+        context "an update" do
+          context "before editing time has passed" do
+            before do
+              stub_time("2011-06-25 13:11")
+              article.update_attributes(:text => "text 3")
+              article.reload
+            end
+
+            it "should update the versioned object" do
+              article.text.should eql("text 3")
+            end
+
+            it "should not create additional versions" do
+              article.versions.should have(1).versions
+            end
+          end
+
+          context "after editing time has passed" do
+            before do
+              stub_time("2011-06-25 13:16")
+              article.update_attributes(:text => "text 3")
+              article.reload
+            end
+
+            it "should update the versioned object" do
+              article.text.should eql("text 3")
+            end
+
+            it "should create a new version object" do
+              article.versions.should have(2).versions
             end
           end
         end
@@ -132,58 +202,58 @@ describe Vidibus::Versioning do
 
   describe "updating a version" do
     context "that is previous" do
-      before {article.update_attributes(:title => "title 2", :text => "text 2")}
+      before {book.update_attributes(:title => "title 2")}
 
       it "should apply changes to the version" do
-        article.version(1).update_attributes(:text => "new text")
-        version = article.reload.version(1)
-        version.text.should eql("new text")
+        book.version(1).update_attributes(:title => "new title")
+        version = book.reload.version(1)
+        version.title.should eql("new title")
       end
 
       it "should not change the versioned object" do
-        article_before = article
-        article.version(1).update_attributes(:text => "new text")
-        article.reload.should eql(article_before)
+        book_before = book
+        book.version(1).update_attributes(:title => "new title")
+        book.reload.should eql(book_before)
       end
 
       it "should return true like regular saving would" do
-        article.version(1).update_attributes(:text => "new text").should be_true
+        book.version(1).update_attributes(:title => "new title").should be_true
       end
 
       it "should perform no update if validation fails" do
-        article.version(1).update_attributes(:title => nil).should be_false
-        article.reload.version(1).title.should eql("title 1")
+        book.version(1).update_attributes(:title => nil).should be_false
+        book.reload.version(1).title.should eql("title 1")
       end
     end
 
     context "that is current" do
       it "should apply changes to the versioned object itself" do
-        article.version(1).update_attributes(:text => "new text")
-        version = article.reload.version(1)
-        version.text.should eql("new text")
+        book.version(1).update_attributes(:title => "new title")
+        version = book.reload.version(1)
+        version.title.should eql("new title")
       end
 
       it "should not create an additional version" do
-        article.version(1).update_attributes(:text => "new text")
-        article.versions.should have(:no).versions
+        book.version(1).update_attributes(:title => "new title")
+        book.versions.should have(:no).versions
       end
     end
 
     context "that has been reverted" do
       before do
-        article.update_attributes(:title => "title 2", :text => "text 2")
-        article.undo!
-        article.redo!
+        book.update_attributes(:text => "text 2")
+        book.undo!
+        book.redo!
       end
 
       it "should apply changes to the versioned object itself" do
-        article.version(2).update_attributes(:text => "new text")
-        article.reload.text.should eql("new text")
+        book.version(2).update_attributes(:text => "new text")
+        book.reload.text.should eql("new text")
       end
 
       it "should apply changes to the version object" do
-        article.version(2).update_attributes(:text => "new text")
-        article.reload.versions.last.versioned_attributes["text"].should eql("new text")
+        book.version(2).update_attributes(:text => "new text")
+        book.reload.versions.last.versioned_attributes["text"].should eql("new text")
       end
     end
   end

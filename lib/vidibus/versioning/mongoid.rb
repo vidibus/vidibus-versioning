@@ -189,12 +189,12 @@ module Vidibus
           obj.versioned_attributes = original_attributes
           obj.created_at = updated_at_was if obj.new_record?
         end
-     end
+      end
 
       # Returns the version object:
       #
       # * If a version is wanted, that version will be selected or instantiated and returned.
-      # * If an editing time has been defined which has not yet passed, the last version will be returned.
+      # * If an editing time has been defined which has not yet passed nil will be returned.
       # * Otherwise a new version will be instantiated.
       #
       def version_obj
@@ -210,12 +210,8 @@ module Vidibus
             end
             obj
           else
-            if editing_time = self.class.versioning_options[:editing_time]
-              last_version = versions.timeline.last
-            end
-            if last_version and last_version.updated_at > Time.now - editing_time
-              last_version
-            else
+            editing_time = self.class.versioning_options[:editing_time]
+            if !editing_time or updated_at <= (Time.now-editing_time.to_i) or updated_at > Time.now # allow future versions
               versions.build(:created_at => updated_at_was)
             end
           end
@@ -262,7 +258,7 @@ module Vidibus
             saved = version_obj.update_attributes(:versioned_attributes => versioned_attributes, :created_at => updated_at)
           end
           return saved unless version_cache.self_version
-        else
+        elsif version_obj
           version_obj.update_attributes!(:versioned_attributes => original_attributes)
           self.version_number = version_obj.number + 1
         end
