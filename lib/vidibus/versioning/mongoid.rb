@@ -227,7 +227,7 @@ module Vidibus
             obj
           else
             editing_time = self.class.versioning_options[:editing_time]
-            if !editing_time or version_updated_at <= (Time.now-editing_time.to_i) or version_updated_at > Time.now # allow future versions
+            if !editing_time or version_updated_at <= (Time.now-editing_time.to_i) or updated_at > Time.now # allow future versions
               versions.build(:created_at => updated_at_was)
             end
           end
