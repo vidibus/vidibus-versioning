@@ -10,13 +10,14 @@ module Vidibus
         has_many :versions, :as => :versioned, :class_name => "Vidibus::Versioning::Version", :dependent => :destroy
 
         field :version_number, :type => Integer, :default => 1
+        field :version_updated_at, :type => Time
 
         after_initialize :original_attributes
         before_update :reset_version_cache
 
         mattr_accessor :versioned_attributes, :unversioned_attributes, :versioning_options
         self.versioned_attributes = []
-        self.unversioned_attributes = %w[_id _type uuid updated_at created_at version_number]
+        self.unversioned_attributes = %w[_id _type uuid updated_at created_at version_number version_updated_at]
         self.versioning_options = {}
 
         # Returns the attributes that should be versioned.
@@ -40,7 +41,6 @@ module Vidibus
         #
         def versioned(*args)
           options = args.extract_options!
-
           self.versioned_attributes = args.map {|a| a.to_s} if args.any?
           self.versioning_options = options if options.any?
         end
@@ -130,6 +130,11 @@ module Vidibus
         version_obj and version_obj.new_record?
       end
 
+      # Returns the time when versioned attributes have been updated.
+      def version_updated_at
+        read_attribute(:version_updated_at) || updated_at
+      end
+
       protected
 
       # Applies version on self. Returns nil
@@ -141,7 +146,10 @@ module Vidibus
 
         self.attributes = version_attributes
         self.version_number = version_cache.wanted_version_number
-        self.updated_at = version_obj.created_at if version_obj.created_at
+        if time = version_obj.created_at
+          self.updated_at = time
+          self.version_updated_at = time
+        end
         nil
       end
 
@@ -216,7 +224,7 @@ module Vidibus
             obj
           else
             editing_time = self.class.versioning_options[:editing_time]
-            if !editing_time or updated_at <= (Time.now-editing_time.to_i) or updated_at > Time.now # allow future versions
+            if !editing_time or version_updated_at <= (Time.now-editing_time.to_i) or version_updated_at > Time.now # allow future versions
               versions.build(:created_at => updated_at_was)
             end
           end
@@ -266,6 +274,7 @@ module Vidibus
         elsif version_obj
           version_obj.update_attributes!(:versioned_attributes => original_attributes)
           self.version_number = version_obj.number + 1
+          self.version_updated_at = Time.now
         end
         nil
       end

@@ -4,6 +4,7 @@ class Article
 
   field :title, :type => String
   field :text, :type => String
+  field :published, :type => Boolean, :default => false
 
   versioned :title, :text, :editing_time => 300
 

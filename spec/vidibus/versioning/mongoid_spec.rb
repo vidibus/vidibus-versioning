@@ -59,8 +59,9 @@ describe Vidibus::Versioning::Mongoid do
           book.version(2).should be_a_new_version
         end
 
-        it "should apply the object's current attributes, but with version number 2" do
-          expected_attributes = book.attributes.merge("version_number" => 2)
+        it "should apply the object's current attributes, but with version number 2 and the version update time" do
+          now = stub_time("2011-07-14 14:00")
+          expected_attributes = book.attributes.merge("version_number" => 2, "version_updated_at" => now)
           book.version(2).attributes.sort.should eql(expected_attributes.sort)
         end
       end
@@ -530,6 +531,31 @@ describe Vidibus::Versioning::Mongoid do
     end
   end
 
+  describe "#version_updated_at" do
+    let(:article) do
+      stub_time("2011-07-14 13:00")
+      record = Article.create(:title => "title 1", :text => "text 1")
+      stub_time("2011-07-14 14:00")
+      record
+    end
+
+    it "should return the time of the last update by default" do
+      article.version_updated_at.should eql(article.updated_at)
+    end
+
+    it "should return the time on which versioned attributes were updated" do
+      article.update_attributes(:title => "Something new")
+      article.reload.version_updated_at.should eql(Time.parse("2011-07-14 14:00"))
+    end
+
+    it "should not change unless versioned attributes get changed" do
+      article.update_attributes(:title => "Something new")
+      stub_time("2011-07-14 15:00")
+      article.update_attributes(:published => true)
+      article.reload.version_updated_at.should eql(Time.parse("2011-07-14 14:00"))
+    end
+  end
+
   describe ".versioned_attributes" do
     it "should be an empty array by default" do
       Book.versioned_attributes.should eql([])
@@ -557,8 +583,8 @@ describe Vidibus::Versioning::Mongoid do
   end
 
   describe ".unversioned_attributes" do
-    it "should return _id, _type, uuid, updated_at, created_at, and version_number" do
-      Book.unversioned_attributes.should eql(%w[_id _type uuid updated_at created_at version_number])
+    it "should return _id, _type, uuid, updated_at, created_at, version_number, and version_updated_at" do
+      Book.unversioned_attributes.should eql(%w[_id _type uuid updated_at created_at version_number version_updated_at])
     end
   end
 end

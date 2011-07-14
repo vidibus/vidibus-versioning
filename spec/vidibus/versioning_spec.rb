@@ -153,6 +153,43 @@ describe Vidibus::Versioning do
               article.versions.last.number.should eql(3)
             end
           end
+
+          context "after editing time has passed and unversioned attributes were changed" do
+            before do
+              stub_time("2011-06-25 13:16")
+              article.update_attributes(:published => true)
+              article.reload
+              article.update_attributes(:text => "text 3")
+              article.reload
+            end
+
+            it "should create a new version object" do
+              article.versions.should have(3).versions
+            end
+          end
+
+          context "of an immediately rolled back version" do
+            before do
+              article.migrate!(:previous)
+              article.reload
+            end
+
+            it "should have 3 version objects" do
+              article.versions.should have(3).versions
+            end
+
+            context "before editing time has passed" do
+              before do
+                stub_time("2011-06-25 13:11")
+                article.update_attributes(:text => "text 3")
+                article.reload
+              end
+
+              it "should create another version object" do
+                article.versions.should have(4).versions
+              end
+            end
+          end
         end
       end
 
