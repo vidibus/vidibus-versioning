@@ -157,10 +157,15 @@ module Vidibus
       end
 
       # Returns original attributes with attributes of version object and wanted attributes merged in.
+      # TODO: Only return attributes that are present on the object. They may have changed.
       def version_attributes
         # TODO: Setting the following line will cause DelayedJob to loop endlessly. The same should happen if an embedded document is defined as versioned_attribute!
         # original_attributes.merge(version_obj.versioned_attributes).merge(version_cache.wanted_attributes.stringify_keys!)
-        version_obj.versioned_attributes.merge(version_cache.wanted_attributes.stringify_keys!)
+
+        Hash[*self.class.fields.keys.zip([]).flatten].             # ensure nil fields are included as well
+          merge(version_obj.versioned_attributes).                 # add version's attributes
+          merge(version_cache.wanted_attributes.stringify_keys!).  # add options provided with #version call
+          except(self.class.unversioned_attributes)                # remove unversioned attributes; they may have changed
       end
 
       # Sets instance variables used for versioning.

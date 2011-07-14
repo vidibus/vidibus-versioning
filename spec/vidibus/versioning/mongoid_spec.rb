@@ -20,6 +20,15 @@ describe Vidibus::Versioning::Mongoid do
       expect {book.version(1)}.not_to raise_error(TypeError)
     end
 
+    it "should set versioned attributes that are nil" do
+      book = Book.create!(:title => "Moby Dick")
+      book.update_attributes!(:text => "Call me Ishmael.")
+      book.reload.versions.first.versioned_attributes.to_a.should eql({"title" => "Moby Dick"}.to_a)
+      previous = book.version(:previous)
+      previous.title.should eql("Moby Dick")
+      previous.text.should be_nil
+    end
+
     context "without arguments" do
       it "should raise an argument error" do
         expect {book.version}.to raise_error(ArgumentError)
