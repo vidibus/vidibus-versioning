@@ -60,32 +60,36 @@ article.redo!        # restores next version
 There is also a method `version` that loads an exisiting version of the record or instantiates a new one:
 
 ```ruby
-article.version(3)            # returns version 3 of the article
-article.version(:previous)    # returns the previous version of the article
-article.version(:next)        # returns the next version of the article
-article.version(:new)         # returns a new version of the article
+article.version(3)         # returns version 3 of the article
+article.version(:previous) # returns the previous version of the article
+article.version(:next)     # returns the next version of the article
+article.version(:new)      # returns a new version of the article
 ```
 
 To apply a version on the current article itself, call `version` with a bang!:
 
 ```ruby
-  article.version!(3) # applies version 3 to the article and returns nil
+article.version!(3) # applies version 3 to the article and returns nil
 ```
 
-It is even possible to apply versioned attributes directly by adding it to the `version` call:
+It is even possible to apply versioned attributes directly by adding them to the `version` call:
 
 ```ruby
-  article.version(3, :title => "Wicked!") # returns version 3 with a new title applied
+article.version(3, :title => "Wicked!") # returns version 3 with a new title applied
 ```
 
 You may treat the article object with an applied version like the article itself. All changes will
-be applied to the loaded version instead of the current instance. An example:
+be applied to the loaded version instead of the current instance. This is useful for creating future versions
+that can be scheduled by [Vidibus::VersionScheduler](https://github.com/vidibus/vidibus-version_scheduler).
+
+A workflow example:
 
 ```ruby
-article.version!(3)         # applies version 3
-article.title = "Brand new" # sets a new title
-article.save                # saves version 3 of the article
-article.reload              # loads the current version of the article
+article = Article.create(:title => "Old shit")
+future_article = article.version(:new)  # initialize a new version
+future_article.updated_at = 1.day.since # set a date in the future
+future_article.title = "New shit"       # set the new title
+future_article.save                     # save the version
 ```
 
 
