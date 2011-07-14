@@ -551,6 +551,11 @@ describe Vidibus::Versioning::Mongoid do
       article.version_updated_at.should eql(article.updated_at)
     end
 
+    it "should return Time.now on a new record" do
+      stub_time("2011-07-14 14:00")
+      Article.new.version_updated_at.should eql(Time.now)
+    end
+
     it "should return the time on which versioned attributes were updated" do
       article.update_attributes(:title => "Something new")
       article.reload.version_updated_at.should eql(Time.parse("2011-07-14 14:00"))

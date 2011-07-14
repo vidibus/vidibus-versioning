@@ -13,6 +13,7 @@ module Vidibus
         field :version_updated_at, :type => Time
 
         after_initialize :original_attributes
+        after_initialize :set_version_updated_at, :unless => :version_updated_at
         before_update :reset_version_cache
 
         mattr_accessor :versioned_attributes, :unversioned_attributes, :versioning_options
@@ -124,11 +125,6 @@ module Vidibus
       # Returns true if version requested is a new one.
       def new_version?
         version_obj and version_obj.new_record?
-      end
-
-      # Returns the time when versioned attributes have been updated.
-      def version_updated_at
-        read_attribute(:version_updated_at) || updated_at
       end
 
       protected
@@ -296,6 +292,10 @@ module Vidibus
       def reset_version_cache
         @original_attributes = versioned_attributes
         @version_cache = nil
+      end
+
+      def set_version_updated_at
+        self.version_updated_at ||= updated_at || Time.now
       end
     end
   end
