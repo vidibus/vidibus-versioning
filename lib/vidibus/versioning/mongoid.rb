@@ -24,11 +24,7 @@ module Vidibus
         # If no versioned attributes have been defined on class level,
         # all attributes will be returned except the unversioned ones.
         def versioned_attributes
-          if self.class.versioned_attributes.any?
-            attributes.only(self.class.versioned_attributes)
-          else
-            attributes.except(self.class.unversioned_attributes)
-          end
+          filter_versioned_attributes(attributes)
         end
       end
 
@@ -170,10 +166,21 @@ module Vidibus
         # TODO: Setting the following line will cause DelayedJob to loop endlessly. The same should happen if an embedded document is defined as versioned_attribute!
         # original_attributes.merge(version_obj.versioned_attributes).merge(version_cache.wanted_attributes.stringify_keys!)
 
-        Hash[*self.class.fields.keys.zip([]).flatten].             # ensure nil fields are included as well
-          merge(version_obj.versioned_attributes).                 # add version's attributes
-          merge(version_cache.wanted_attributes.stringify_keys!).  # add options provided with #version call
-          except(self.class.unversioned_attributes)                # remove unversioned attributes; they may have changed
+        a = Hash[*self.class.fields.keys.zip([]).flatten].        # ensure nil fields are included as well
+            merge(version_obj.versioned_attributes)               # add version's attributes
+        filter_versioned_attributes(a).                           # take versioned attributes only
+          merge(version_cache.wanted_attributes.stringify_keys!)  # add options provided with #version call
+      end
+
+      # Returns versioned attributes from input by
+      # including defined attributes only or
+      # removing unversioned ones.
+      def filter_versioned_attributes(input)
+        if self.class.versioned_attributes.any?
+          input.only(self.class.versioned_attributes)
+        else
+          input.except(self.class.unversioned_attributes)
+        end
       end
 
       # Sets instance variables used for versioning.
