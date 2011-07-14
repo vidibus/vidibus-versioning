@@ -32,10 +32,8 @@ describe Vidibus::Versioning::Mongoid do
     it "should not set attributes that are not versioned" do
       stub_time("2011-07-14 16:00")
       article = Article.create!(:title => "Moby Dick", :published => false)
-      puts %(article.published = #{article.published.inspect})
       stub_time("2011-07-14 17:00")
       article.update_attributes!(:text => "Call me Ishmael.", :published => true)
-      puts %(article.published = #{article.published.inspect})
       article.version(:previous).published.should be_true
     end
 
