@@ -66,7 +66,7 @@ article.version(:next)     # returns the next version of the article
 article.version(:new)      # returns a new version of the article
 ```
 
-To apply a version on the current article itself, call `version` with a bang!:
+To apply a version on the current article itself (without persisting it), call `version` with a bang!:
 
 ```ruby
 article.version!(3) # applies version 3 to the article and returns nil
