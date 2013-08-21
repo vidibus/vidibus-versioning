@@ -9,7 +9,7 @@ module Vidibus
 
       field :versioned_uuid, :type => String
       field :versioned_attributes, :type => Hash, :default => {}
-      field :number, :type => Integer, :default => nil
+      field :number, :type => Integer
 
       index :versioned_uuid
       index :number
