@@ -141,8 +141,14 @@ module Vidibus
       def apply_version!(*args)
         raise ArgumentError if args.empty?
         set_version_args(*args)
-        version_cache.self_version = (version_number == version_cache.wanted_version_number)
-        return if version_cache.self_version
+        if version_number == version_cache.wanted_version_number
+          version_cache.self_version = true
+          return
+        end
+        version_cache.self_version = false
+        unless version_obj
+          raise VersionNotFoundError.new("version #{version_cache.wanted_version_number} does not exist")
+        end
 
         self.attributes = version_attributes
         self.version_number = version_cache.wanted_version_number
@@ -206,6 +212,7 @@ module Vidibus
         when :next, 'next' then version_number + 1
         when :previous, 'previous' then version_number - 1
         else
+          version_cache.existing_version_wanted = true
           num.to_i
         end
 
@@ -235,7 +242,7 @@ module Vidibus
           if version_cache.wanted_version_number
             obj = versions.
               where(:number => version_cache.wanted_version_number).first
-            unless obj || version_cache.self_version
+            unless obj || version_cache.self_version || version_cache.existing_version_wanted
               # versions.to_a # TODO: prefetch versions before building a new one?
               obj = versions.build({
                 :number => version_cache.wanted_version_number,
@@ -268,6 +275,7 @@ module Vidibus
       def version_cache
         @version_cache ||= Struct.new(
           :wanted_version_number,
+          :existing_version_wanted,
           :wanted_attributes,
           :new_version_number,
           :version_obj,

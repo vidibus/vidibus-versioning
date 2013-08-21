@@ -88,15 +88,9 @@ describe Vidibus::Versioning::Mongoid do
 
     context 'with argument 2' do
       context 'if only one version is available' do
-        it 'should return a new version of the record' do
-          book.version(2).should be_a_new_version
-        end
-
-        it 'should apply the object\'s current attributes, but with version number 2 and the version update time' do
-          now = stub_time('2011-07-14 14:00')
-          expected_attributes = book.attributes.
-            merge('version_number' => 2, 'version_updated_at' => now)
-          book.version(2).attributes.sort.should eq(expected_attributes.sort)
+        it 'should raise an error' do
+          expect { book.version(2) }.
+            to raise_error(Vidibus::Versioning::VersionNotFoundError)
         end
       end
 
@@ -199,24 +193,31 @@ describe Vidibus::Versioning::Mongoid do
       end
     end
 
-    context 'with arguments 2, :title => "new 2"' do
-      context 'if version 2 does not exist yet' do
-        it 'should initialize a new version with given attributes' do
-          version = book.version(2, :title => 'new')
-          version.version_number.should eq(2)
-          version.title.should eq('new')
-          version.text.should eq('text 1')
-          version.should be_a_new_version
-        end
+    context 'with arguments :new, :title => "new 2"' do
+      it 'should initialize a new version with given attributes' do
+        version = book.version(:new, :title => 'new')
+        version.version_number.should eq(2)
+        version.title.should eq('new')
+        version.text.should eq('text 1')
+        version.should be_a_new_version
       end
+    end
 
-      context 'if version 2 does exist' do
+    context 'with arguments 2, :title => "new 2"' do
+      context 'if version 2 exists' do
         it 'should set given attributes on version 2' do
           book_with_two_versions.migrate!(1)
           version = book_with_two_versions.version(2, :title => 'new')
           version.version_number.should eq(2)
           version.title.should eq('new')
           version.title_changed?.should be_true
+        end
+      end
+
+      context 'if version 2 does not exist' do
+        it 'should raise an error' do
+          expect { book.version(2, :title => 'new') }.
+            to raise_error(Vidibus::Versioning::VersionNotFoundError)
         end
       end
     end
@@ -435,7 +436,7 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#new_version?' do
     it 'should return true if version is a new one' do
-      book.version(2).new_version?.should be_true
+      book.version(:new).new_version?.should be_true
     end
 
     it 'should return if version is the current one' do
