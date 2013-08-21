@@ -7,7 +7,7 @@ module Vidibus
         include ::Mongoid::Timestamps
         include Vidibus::Uuid::Mongoid
 
-        has_many :versions, :as => :versioned, :class_name => "Vidibus::Versioning::Version", :dependent => :destroy
+        has_many :versions, :as => :versioned, :class_name => 'Vidibus::Versioning::Version', :dependent => :destroy
 
         field :version_number, :type => Integer, :default => 1
         field :version_updated_at, :type => Time
@@ -67,9 +67,15 @@ module Vidibus
       # Applies attributes of wanted version on self.
       # Stores current attributes in a new version.
       def migrate!(number = nil)
-        raise(MigrationError, "no version given") unless number or version_cache.wanted_version_number
-        version!(number) if number and number != version_cache.wanted_version_number
-        raise(MigrationError, "cannot migrate to current version") if version_cache.self_version
+        unless number || version_cache.wanted_version_number
+          raise(MigrationError, 'no version given')
+        end
+        if number && number != version_cache.wanted_version_number
+          version!(number)
+        end
+        if version_cache.self_version
+          raise(MigrationError, 'cannot migrate to current version')
+        end
 
         set_original_version_obj
 
@@ -99,7 +105,9 @@ module Vidibus
 
       # Raises a validation error if saving fails.
       def save!(*args)
-        raise(::Mongoid::Errors::Validations, self) unless save(*args)
+        unless save(*args)
+          raise(::Mongoid::Errors::Validations, self)
+        end
       end
 
       def delete
@@ -162,10 +170,17 @@ module Vidibus
         # TODO: Setting the following line will cause DelayedJob to loop endlessly. The same should happen if an embedded document is defined as versioned_attribute!
         # original_attributes.merge(version_obj.versioned_attributes).merge(version_cache.wanted_attributes.stringify_keys!)
 
-        a = Hash[*self.class.fields.keys.zip([]).flatten].        # ensure nil fields are included as well
-            merge(version_obj.versioned_attributes)               # add version's attributes
-        filter_versioned_attributes(a).                           # take versioned attributes only
-          merge(version_cache.wanted_attributes.stringify_keys!)  # add options provided with #version call
+        # ensure nil fields are included as well
+        attributes = Hash[*self.class.fields.keys.zip([]).flatten]
+
+        # add version's attributes
+        attributes = attributes.merge(version_obj.versioned_attributes)
+
+        # take versioned attributes only
+        filtered = filter_versioned_attributes(attributes)
+
+        # add options provided with #version call
+        filtered.merge(version_cache.wanted_attributes.stringify_keys!)
       end
 
       # Returns versioned attributes from input by
@@ -216,18 +231,20 @@ module Vidibus
       def version_obj
         version_cache.version_obj ||= begin
           if version_cache.wanted_version_number
-            obj = versions.where(:number => version_cache.wanted_version_number).first
-            unless obj or version_cache.self_version
+            obj = versions.
+              where(:number => version_cache.wanted_version_number).first
+            unless obj || version_cache.self_version
               # versions.to_a # TODO: prefetch versions before building a new one?
-              obj = versions.build(
+              obj = versions.build({
                 :number => version_cache.wanted_version_number,
                 :versioned_attributes => versioned_attributes,
-                :created_at => updated_at_was)
+                :created_at => updated_at_was
+              })
             end
             obj
           else
             editing_time = self.class.versioning_options[:editing_time]
-            if !editing_time or version_updated_at <= (Time.now-editing_time.to_i) or updated_at > Time.now # allow future versions
+            if !editing_time || version_updated_at <= (Time.now-editing_time.to_i) || updated_at > Time.now # allow future versions
               versions.build(:created_at => updated_at_was)
             end
           end
@@ -271,11 +288,16 @@ module Vidibus
           version_cache.original_version_obj.save!
         elsif version_cache.wanted_version_number
           if version_obj
-            saved = version_obj.update_attributes(:versioned_attributes => versioned_attributes, :created_at => updated_at)
+            saved = version_obj.update_attributes({
+              :versioned_attributes => versioned_attributes,
+              :created_at => updated_at
+            })
           end
           return saved unless version_cache.self_version
         elsif version_obj
-          version_obj.update_attributes!(:versioned_attributes => original_attributes)
+          version_obj.update_attributes!({
+            :versioned_attributes => original_attributes
+          })
           self.version_number = version_obj.number + 1
           self.version_updated_at = Time.now
         end
