@@ -202,14 +202,16 @@ module Vidibus
         wanted_version_number = args.first
 
         version_cache.wanted_version_number = case wanted_version_number
-        when :new       then new_version_number
-        when :next      then version_number + 1
-        when :previous  then version_number - 1
+        when :new, 'new' then new_version_number
+        when :next, 'next' then version_number + 1
+        when :previous, 'previous' then version_number - 1
         else
           wanted_version_number.to_i
         end
 
-        version_cache.wanted_version_number = 1 if version_cache.wanted_version_number < 1
+        if version_cache.wanted_version_number < 1
+          version_cache.wanted_version_number = 1
+        end
       end
 
       # Finds or builds a version object containing the record's current attributes.

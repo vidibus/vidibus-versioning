@@ -123,6 +123,10 @@ describe Vidibus::Versioning::Mongoid do
         it 'should set version number 2' do
           book.version(:new).version_number.should eq(2)
         end
+
+        it 'should set version number 2 even if argument is given as string' do
+          book.version('new').version_number.should eq(2)
+        end
       end
 
       context 'if two versions are available and the current version is 1' do
@@ -157,6 +161,10 @@ describe Vidibus::Versioning::Mongoid do
         it 'should set version number 2' do
           book.version(:next).version_number.should eq(2)
         end
+
+        it 'should set version number 2 even if argument is given as string' do
+          book.version('next').version_number.should eq(2)
+        end
       end
 
       context 'if several versions are available and the current version is 1' do
@@ -173,6 +181,11 @@ describe Vidibus::Versioning::Mongoid do
     context 'with argument :previous' do
       it 'should return version 1, if current version is 2' do
         book_with_two_versions.version(:previous).version_number.should eq(1)
+      end
+
+      it 'should return version 2, if current version is 3 and argument is given as string' do
+        book_with_three_versions.version('previous').
+          version_number.should eq(2)
       end
 
       it 'should return a copy of self, if current version is 1' do
