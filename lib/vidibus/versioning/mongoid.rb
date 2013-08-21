@@ -64,6 +64,18 @@ module Vidibus
         self.apply_version!(*args)
       end
 
+      # Returns true if version number exists.
+      # Argument must be an integer.
+      #
+      def version?(number)
+        raise ArgumentError unless number.is_a?(Integer)
+        if version_number == number
+          true
+        else
+          !!versions.where(:number => number).first
+        end
+      end
+
       # Applies attributes of wanted version on self.
       # Stores current attributes in a new version.
       def migrate!(number = nil)

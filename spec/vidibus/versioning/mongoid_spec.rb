@@ -248,6 +248,48 @@ describe Vidibus::Versioning::Mongoid do
     end
   end
 
+  describe '#version?' do
+    context 'without arguments' do
+      it 'raise an error' do
+        expect { book.version? }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with an arbitrary argument' do
+      it 'should raise an error' do
+        expect { book.version?('what') }.to raise_error(ArgumentError)
+      end
+    end
+
+    context 'with a valid version number' do
+      context 'on an object with versions' do
+        it 'should return true' do
+          book_with_two_versions.version?(2).should be_true
+        end
+      end
+
+      context 'on an object without versions' do
+        it 'should return true' do
+          book.version?(1).should be_true
+        end
+      end
+    end
+
+    context 'with an invalid version number' do
+      context 'on an object with versions' do
+        it 'should return false' do
+          book_with_two_versions.version?(3).should be_false
+        end
+      end
+
+      context 'on an object without versions' do
+        it 'should return false' do
+          book.version?(2).should be_false
+        end
+      end
+    end
+  end
+
   describe '#migrate!' do
     it 'should call #save!' do
       book_with_two_versions
