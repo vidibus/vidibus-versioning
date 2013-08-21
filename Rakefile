@@ -8,11 +8,6 @@ Bundler::GemHelper.install_tasks
 $LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require "vidibus/versioning/_version"
 
-RSpec::Core::RakeTask.new(:rcov) do |t|
-  t.pattern = "spec/**/*_spec.rb"
-  t.rcov = true
-  t.rcov_opts = ["--exclude", "^spec,/gems/"]
-end
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = "rdoc"
@@ -22,4 +17,3 @@ Rake::RDocTask.new do |rdoc|
   rdoc.options << "--charset=utf-8"
 end
 
-task :default => :rcov
