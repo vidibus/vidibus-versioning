@@ -35,6 +35,14 @@ describe Vidibus::Versioning::Version do
         })
         next_version.number.should eq(2)
       end
+
+      it 'should be 1 for next version of different object' do
+        next_version = Vidibus::Versioning::Version.create({
+          :versioned => another_book,
+          :versioned_attributes => another_book.attributes
+        })
+        next_version.number.should eq(1)
+      end
     end
   end
 end

@@ -33,7 +33,12 @@ module Vidibus
 
       def set_number
         return if number
-        previous = Version.desc(:number).limit(1).first
+        previous = Version.
+          where({
+            :versioned_id => versioned_id,
+            :versioned_type => versioned_type
+          }).
+          desc(:number).limit(1).first
         self.number = previous ? previous.number + 1 : 1
       end
 
