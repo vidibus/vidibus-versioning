@@ -217,32 +217,32 @@ describe Vidibus::Versioning do
           context 'before editing time has passed' do
             before do
               stub_time('2011-06-25 13:11')
-              article.update_attributes(:text => 'text 3')
-              article.reload
             end
 
             it 'should update the versioned object' do
-              article.text.should eq('text 3')
+              article.update_attributes(:text => 'text 3')
+              article.reload.text.should eq('text 3')
             end
 
             it 'should not create additional versions' do
-              article.versions.should have(1).versions
+              article.update_attributes(:text => 'text 3')
+              article.reload.versions.should have(1).versions
             end
           end
 
           context 'after editing time has passed' do
             before do
               stub_time('2011-06-25 13:16')
-              article.update_attributes(:text => 'text 3')
-              article.reload
             end
 
             it 'should update the versioned object' do
-              article.text.should eq('text 3')
+              article.update_attributes(:text => 'text 3')
+              article.reload.text.should eq('text 3')
             end
 
             it 'should create a new version object' do
-              article.versions.should have(2).versions
+              article.update_attributes(:text => 'text 3')
+              article.reload.versions.should have(2).versions
             end
           end
         end
