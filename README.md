@@ -72,6 +72,14 @@ To apply a version on the current article itself (without persisting it), call `
 article.version!(3) # applies version 3 to the article and returns nil
 ```
 
+To find out if a version exists, call:
+
+```ruby
+article.version?(1) # returns true on a fresh object
+article.version?(2) # returns true if version 2 exists
+article.version?(3) # returns false if version 3 does not exist
+```
+
 It is even possible to apply versioned attributes directly by adding them to the `version` call:
 
 ```ruby
