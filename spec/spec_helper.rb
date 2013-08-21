@@ -5,18 +5,18 @@ end
 
 $:.unshift File.expand_path('../../', __FILE__)
 
-require "rubygems"
-require "rspec"
-require "rr"
-require "vidibus-versioning"
+require 'rubygems'
+require 'rspec'
+require 'rr'
+require 'vidibus-versioning'
 
-require "support/article"
-require "support/book"
-require "support/stubs"
+require 'support/article'
+require 'support/book'
+require 'support/stubs'
 
 Mongoid.configure do |config|
-  name = "vidibus-versioning_test"
-  host = "localhost"
+  name = 'vidibus-versioning_test'
+  host = 'localhost'
   config.master = Mongo::Connection.new.db(name)
   config.logger = nil
 end
