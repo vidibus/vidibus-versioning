@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.homepage    = "https://github.com/vidibus/vidibus-versioning"
   s.summary     = "Advanced versioning for Mongoid models"
   s.description = "Versioning designed for advanced usage, like scheduling versions."
+  s.license     = 'MIT'
 
   s.required_rubygems_version = ">= 1.3.6"
   s.rubyforge_project         = "vidibus-versioning"
