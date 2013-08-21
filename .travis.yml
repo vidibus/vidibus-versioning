@@ -1,3 +1,4 @@
+services: mongodb
 rvm:
   - ruby-head
   - 1.9.2
