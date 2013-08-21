@@ -38,7 +38,7 @@ describe Vidibus::Versioning::Mongoid do
     it 'should not change self' do
       book = book_with_two_versions
       book.freeze
-      expect { book.version(1) }.not_to raise_error(TypeError)
+      expect { book.version(1) }.not_to raise_error
     end
 
     it 'should set versioned attributes that are nil' do
