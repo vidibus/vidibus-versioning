@@ -224,9 +224,9 @@ describe Vidibus::Versioning do
               article.reload.text.should eq('text 3')
             end
 
-            it 'should not create additional versions' do
+            it 'should create a new version object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.versions.should have(1).versions
+              article.reload.versions.should have(2).versions
             end
           end
 
