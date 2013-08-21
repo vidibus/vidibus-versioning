@@ -206,9 +206,15 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#version!' do
     context 'without arguments' do
+      it 'raise an error' do
+        expect { book.version! }.to raise_error
+      end
+    end
+
+    context 'with current version number' do
       it 'not change self' do
         book.freeze
-        expect { book.version! }.not_to raise_error(TypeError)
+        expect { book.version!(book.version_number) }.not_to raise_error
       end
     end
 
