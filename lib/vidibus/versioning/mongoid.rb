@@ -199,14 +199,14 @@ module Vidibus
       def set_version_args(*args)
         version_cache.version_args = args
         version_cache.wanted_attributes = args.extract_options!
-        wanted_version_number = args.first
+        num = args.first
 
-        version_cache.wanted_version_number = case wanted_version_number
+        version_cache.wanted_version_number = case num
         when :new, 'new' then new_version_number
         when :next, 'next' then version_number + 1
         when :previous, 'previous' then version_number - 1
         else
-          wanted_version_number.to_i
+          num.to_i
         end
 
         if version_cache.wanted_version_number < 1
