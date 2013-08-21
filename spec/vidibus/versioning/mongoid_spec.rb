@@ -124,6 +124,11 @@ describe Vidibus::Versioning::Mongoid do
           book.version(:new).version_number.should eq(2)
         end
 
+        it 'should set version update time' do
+          now = stub_time('2011-07-14 14:00')
+          book.version(:new).version_updated_at.should eq(now)
+        end
+
         it 'should set version number 2 even if argument is given as string' do
           book.version('new').version_number.should eq(2)
         end
@@ -220,7 +225,7 @@ describe Vidibus::Versioning::Mongoid do
   describe '#version!' do
     context 'without arguments' do
       it 'raise an error' do
-        expect { book.version! }.to raise_error
+        expect { book.version! }.to raise_error(ArgumentError)
       end
     end
 
