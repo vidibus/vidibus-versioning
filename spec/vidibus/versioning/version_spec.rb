@@ -45,4 +45,50 @@ describe Vidibus::Versioning::Version do
       end
     end
   end
+
+  describe '#past?' do
+    before do
+      subject.versioned = book
+      subject.versioned_attributes = book.attributes
+      subject.save
+    end
+
+    it 'should be true if creation date is in the past' do
+      subject.created_at = Time.now - 20000
+      subject.past?.should be_true
+    end
+
+    it 'should be false if creation date is in the future' do
+      subject.created_at = Time.now + 20000
+      subject.past?.should be_false
+    end
+
+    it 'should be false if creation date has not been set' do
+      subject.created_at = nil
+      subject.past?.should be_false
+    end
+  end
+
+  describe '#future?' do
+    before do
+      subject.versioned = book
+      subject.versioned_attributes = book.attributes
+      subject.save
+    end
+
+    it 'should be true if creation date is in the future' do
+      subject.created_at = Time.now + 20000
+      subject.future?.should be_true
+    end
+
+    it 'should be false if creation date is in the past' do
+      subject.created_at = Time.now - 20000
+      subject.future?.should be_false
+    end
+
+    it 'should be false if creation date has not been set' do
+      subject.created_at = nil
+      subject.future?.should be_false
+    end
+  end
 end
