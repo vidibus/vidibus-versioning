@@ -15,15 +15,13 @@ require 'support/book'
 require 'support/stubs'
 
 Mongoid.configure do |config|
-  name = 'vidibus-versioning_test'
-  host = 'localhost'
-  config.master = Mongo::Connection.new.db(name)
-  config.logger = nil
+  config.connect_to('vidibus-versioning_test')
 end
 
 RSpec.configure do |config|
   config.mock_with :rr
   config.before(:each) do
-    Mongoid.master.collections.select {|c| c.name !~ /system/}.each(&:drop)
+    Mongoid::Sessions.default.collections.
+      select {|c| c.name !~ /system/}.each(&:drop)
   end
 end

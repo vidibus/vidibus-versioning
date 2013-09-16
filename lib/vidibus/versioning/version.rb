@@ -11,8 +11,7 @@ module Vidibus
       field :versioned_attributes, :type => Hash, :default => {}
       field :number, :type => Integer
 
-      index :versioned_uuid
-      index :number
+      index({versioned_uuid: 1, number: 1})
 
       validates :versioned_uuid, :versioned_attributes, :presence => true
 
