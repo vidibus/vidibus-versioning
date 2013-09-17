@@ -10,7 +10,7 @@ require 'vidibus/versioning/_version'
 
 Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = 'vidibus-sysinfo #{Vidibus::Versioning::VERSION}'
+  rdoc.title = "vidibus-versioning #{Vidibus::Versioning::VERSION}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
   rdoc.options << '--charset=utf-8'
