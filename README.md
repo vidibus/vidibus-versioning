@@ -1,4 +1,4 @@
-# Vidibus::Versioning [![](http://travis-ci.org/vidibus/vidibus-versioning.png)](http://travis-ci.org/vidibus/vidibus-versioning) [![](http://stillmaintained.com/vidibus/vidibus-versioning.png)](http://stillmaintained.com/vidibus/vidibus-versioning)
+# Vidibus::Versioning [![](http://travis-ci.org/vidibus/vidibus-versioning.png)](http://travis-ci.org/vidibus/vidibus-versioning)
 
 Vidibus::Versioning provides advanced versioning for Mongoid models including support for future and editable versions.
 
