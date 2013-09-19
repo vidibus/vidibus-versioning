@@ -120,4 +120,4 @@ article.version_object            # => nil
 
 ## Copyright
 
-Copyright (c) 2011 Andre Pankratz. See LICENSE for details.
+Copyright (c) 2011-2013 Andre Pankratz. See LICENSE for details.
