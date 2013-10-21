@@ -413,7 +413,7 @@ describe Vidibus::Versioning::Mongoid do
         book.migrate!(:next)
         book.reload
         book.versions[0].created_at.
-          should eq(Time.parse('2012-01-01 00:00 UTC').localtime)
+          should eq(Time.parse('2011-07-01 03:00 UTC').localtime)
         book.versions[1].created_at.
           should eq(Time.parse('2011-07-01 01:00 UTC').localtime)
       end

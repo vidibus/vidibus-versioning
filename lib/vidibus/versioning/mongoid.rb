@@ -91,6 +91,10 @@ module Vidibus
 
         set_original_version_obj
 
+        if version_object.future?
+          version_object.update_attributes(:created_at => Time.now)
+        end
+
         self.attributes = version_attributes
         self.version_number = version_cache.wanted_version_number
         save!
