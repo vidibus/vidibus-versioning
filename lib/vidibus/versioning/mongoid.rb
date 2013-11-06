@@ -14,7 +14,7 @@ module Vidibus
 
         after_initialize :original_attributes
         after_initialize :set_version_updated_at, :unless => :version_updated_at
-        before_update :reset_version_cache
+        before_save :reset_version_cache
 
         mattr_accessor :versioned_attributes, :unversioned_attributes, :versioning_options
         self.versioned_attributes = []
