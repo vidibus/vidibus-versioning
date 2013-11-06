@@ -28,6 +28,13 @@ describe Vidibus::Versioning::Mongoid do
     })
     book
   end
+  let(:comment) do
+    Comment.create(text: 'text 1', author: 'Leela')
+  end
+  let(:comment_with_two_versions) do
+    comment.update_attributes(text: 'text 2')
+    comment
+  end
 
   def reset_book
     Book.versioned_attributes = []
@@ -533,43 +540,160 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#save' do
     context 'without a version loaded' do
-      it 'should work as expected for versioned object' do
-        book.title = 'new title'
-        book.save
-        book.reload.title.should eq('new title')
+      it 'should persist an existing versioned record' do
+        comment.text = 'new text'
+        comment.save
+        comment.reload.text.should eq('new text')
+      end
+
+      it 'should persist a new versioned record' do
+        comment = Comment.new
+        comment.text = 'new text'
+        comment.save
+        comment.reload.text.should eq('new text')
       end
     end
 
-    context 'with a version loaded' do
-      let(:version) {book_with_two_versions.version(1)}
+    context 'on the current version' do
+      let(:version) { comment }
 
-      it 'should return false if record is invalid' do
-        version.title = nil
-        version.save.should be_false
+      context 'without changes' do
+        it 'should return true if saving succeeds' do
+          version.save.should be_true
+        end
       end
 
-      it 'should not update the version object if the record is invalid' do
-        version.title = nil
-        version.save
-        version.reload.versions.first.
-          versioned_attributes['title'].should_not be_nil
+      context 'and changes to versioned attributes' do
+        it 'should return false if record is invalid' do
+          version.text = nil
+          version.save.should be_false
+        end
+
+        it 'should not create a version object if the record is invalid' do
+          version.text = nil
+          version.save
+          version.reload.versions.count.should eq(0)
+        end
+
+        it 'should update the versioned object' do
+          version.text = 'new text'
+          version.save
+          version.reload.text.should eq('new text')
+        end
+
+        it 'should create a new version object' do
+          version.text = 'new text'
+          version.save!
+          version.versions.count.should eq(1)
+          version.versions.first.
+            versioned_attributes['text'].should eq('text 1')
+        end
       end
 
-      it 'should return true if saving succeeds' do
-        version.save.should be_true
+      context 'and changes to unversioned attributes' do
+        it 'should update the versioned object' do
+          version.author = 'Philip'
+          version.save
+          version.reload.author.should eq('Philip')
+        end
+
+        it 'should not create a new version object' do
+          version.author = 'Philip'
+          version.save!
+          version.reload.versions.count.should eq(0)
+        end
+      end
+    end
+
+    context 'on a previous version' do
+      let(:version) { comment_with_two_versions.version(1) }
+
+      context 'and changes to versioned attributes' do
+        it 'should return false if record is invalid' do
+          version.text = nil
+          version.save.should be_false
+        end
+
+        it 'should not update the version object if the record is invalid' do
+          version.text = nil
+          version.save
+          version.reload.versions.first.
+            versioned_attributes['text'].should_not be_nil
+        end
+
+        it 'should return true if saving succeeds' do
+          version.save.should be_true
+        end
+
+        it 'should not update the versioned object' do
+          version.text = 'new text'
+          version.save
+          version.reload.text.should_not eq('new text')
+        end
+
+        it 'should update the version object' do
+          version.text = 'new text'
+          version.save
+          version.reload.versions.first.
+            versioned_attributes['text'].should eq('new text')
+        end
       end
 
-      it 'should not update the versioned object' do
-        version.title = 'new title'
-        version.save
-        version.reload.title.should_not eq('new title')
+      context 'and changes to unversioned attributes' do
+        it 'should update the versioned object' do
+          version.author = 'Philip'
+          version.save
+          version.reload.author.should eq('Philip')
+        end
+
+        it 'should not create a new version object' do
+          version.author = 'Philip'
+          version.save!
+          version.reload.versions.count.should eq(1)
+        end
+      end
+    end
+
+    context 'on a new version' do
+      let(:version) { comment.version(:new) }
+
+      context 'and changes to versioned attributes' do
+        it 'should return false if record is invalid' do
+          version.text = nil
+          version.save.should be_false
+        end
+
+        it 'should not create a version object if the record is invalid' do
+          version.text = nil
+          version.save
+          version.reload.versions.count.should eq(0)
+        end
+
+        it 'should return true if saving succeeds' do
+          version.save.should be_true
+        end
+
+        it 'should create a new version object' do
+          version.text = 'new text'
+          version.save!
+          version.versions.count.should eq(1)
+          version.versions.first.
+            versioned_attributes['text'].should eq('new text')
+        end
       end
 
-      it 'should update the version object' do
-        version.title = 'new title'
-        version.save
-        version.reload.versions.first.
-          versioned_attributes['title'].should eq('new title')
+      context 'and changes to unversioned attributes' do
+        it 'should update the versioned object' do
+          version.author = 'Philip'
+          version.save
+          version.reload.author.should eq('Philip')
+        end
+
+        it 'should not create a new version object' do
+          version.author = 'Philip'
+          version.save!
+          version.reload.versions.count.should eq(0)
+        end
       end
     end
   end

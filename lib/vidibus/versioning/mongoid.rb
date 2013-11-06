@@ -156,6 +156,19 @@ module Vidibus
         versioned_attributes != original_attributes
       end
 
+      # Returns changes to unversioned attributes.
+      # "Unversioned attributes" are attributes that are not versioned and
+      # should be applied to all versions, but are not included in
+      # #unversioned_attributes either.
+      def unversioned_changes
+        changes.except(versioned_attributes.keys + unversioned_attributes)
+      end
+
+      # Returns true if unversioned attributes have changed.
+      def unversioned_attributes_changed?
+        unversioned_changes.any?
+      end
+
       protected
 
       # Applies version on self. Returns nil
@@ -326,7 +339,13 @@ module Vidibus
               :created_at => updated_at
             })
           end
-          return saved unless version_cache.self_version
+          unless version_cache.self_version
+            if saved == false
+              return false
+            elsif !unversioned_attributes_changed?
+              return true
+            end
+          end
         elsif version_obj
           version_obj.update_attributes!({
             :versioned_attributes => original_attributes

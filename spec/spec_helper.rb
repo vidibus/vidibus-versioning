@@ -10,9 +10,7 @@ require 'rspec'
 require 'rr'
 require 'vidibus-versioning'
 
-require 'support/article'
-require 'support/book'
-require 'support/stubs'
+Dir['spec/support/**/*.rb'].each { |f| require f }
 
 Mongoid.configure do |config|
   config.connect_to('vidibus-versioning_test')
