@@ -126,6 +126,13 @@ describe Vidibus::Versioning::Mongoid do
         it 'should set version number 2 even if argument is given as string' do
           book.version('new').version_number.should eq(2)
         end
+
+        it 'should use the next unsaved version number' do
+          book.version(:new).version_number.should eq(2)
+          book.version(:new).version_number.should eq(2)
+          book.version(:new).save!
+          book.version(:new).version_number.should eq(3)
+        end
       end
 
       context 'if two versions are available and the current version is 1' do
