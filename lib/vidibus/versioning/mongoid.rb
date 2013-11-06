@@ -151,6 +151,11 @@ module Vidibus
         version_obj && version_obj.new_record?
       end
 
+      # Returns true if versioned attributes have changed.
+      def versioned_attributes_changed?
+        versioned_attributes != original_attributes
+      end
+
       protected
 
       # Applies version on self. Returns nil
@@ -179,11 +184,6 @@ module Vidibus
       # This method has to be called after_initialize.
       def original_attributes
         @original_attributes ||= versioned_attributes
-      end
-
-      # Returns true if versioned attributes were changed.
-      def versioned_attributes_changed?
-        versioned_attributes != original_attributes
       end
 
       # Returns original attributes with attributes of version object and wanted attributes merged in.
