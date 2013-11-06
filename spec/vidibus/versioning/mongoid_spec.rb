@@ -127,10 +127,17 @@ describe Vidibus::Versioning::Mongoid do
           book.version('new').version_number.should eq(2)
         end
 
-        it 'should use the next unsaved version number' do
+        it 'should not apply a new version until the current one is persisted' do
           book.version(:new).version_number.should eq(2)
           book.version(:new).version_number.should eq(2)
-          book.version(:new).save!
+          book.version(:new).save
+          book.version(:new).version_number.should eq(2)
+        end
+
+        it 'should not apply a new version if the current one is persisted' do
+          book.version(:new).version_number.should eq(2)
+          book.version(:new).version_number.should eq(2)
+          book.version(:new).update_attributes(title: 'new title')
           book.version(:new).version_number.should eq(3)
         end
       end

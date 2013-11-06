@@ -309,7 +309,14 @@ module Vidibus
       #
       def persist_version
         return if new_record?
-        return unless versioned_attributes_changed?
+        if !versioned_attributes_changed?
+          # Reset version number if new version won't be persisted.
+          if version_cache.new_version_number
+            self.version_number = version_number_was
+          end
+          return
+        end
+
         if version_cache.original_version_obj
           version_cache.original_version_obj.save!
         elsif version_cache.wanted_version_number
