@@ -52,8 +52,10 @@ module Vidibus
       #   48         returns version 48 of self
       #
       def version(*args)
-        self.class.find(_id).tap do |copy|
-          copy.apply_version!(*args)
+        ::Mongoid.unit_of_work(disable: :current) do
+          self.class.find(_id).tap do |copy|
+            copy.apply_version!(*args)
+          end
         end
       end
 
