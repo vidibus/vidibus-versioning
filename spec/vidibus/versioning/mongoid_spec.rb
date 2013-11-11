@@ -99,6 +99,12 @@ describe Vidibus::Versioning::Mongoid do
           expect { book.version(2) }.
             to raise_error(Vidibus::Versioning::VersionNotFoundError)
         end
+
+        it 'should raise an error even when a new version has been loaded before' do
+          book.version(:new)
+          expect { book.version(2) }.
+            to raise_error(Vidibus::Versioning::VersionNotFoundError)
+        end
       end
 
       context 'if several versions are available' do
