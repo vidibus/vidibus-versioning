@@ -14,6 +14,7 @@ Dir['spec/support/**/*.rb'].each { |f| require f }
 
 Mongoid.configure do |config|
   config.connect_to('vidibus-versioning_test')
+  config.identity_map_enabled = true
 end
 
 RSpec.configure do |config|
