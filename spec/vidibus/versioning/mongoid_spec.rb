@@ -870,4 +870,46 @@ describe Vidibus::Versioning::Mongoid do
       Book.unversioned_attributes.should eq(expected)
     end
   end
+
+  describe 'callbacks' do
+    let(:order) do
+      obj = Order.create(:status => 'Processed')
+      obj.update_attributes!(:status => 'Shipped')
+      obj.reload
+    end
+
+    context 'before save' do
+      it 'should be triggered before saving a version' do
+        mock(order).callback_before_version_save
+        # order.update_attributes(:status => 'Delivered')
+        order.save
+      end
+
+      it 'should not persist version when returning false' do
+        stub(order).callback_before_version_save { false }
+        dont_allow(order).persist_version
+        order.save
+      end
+
+      it 'should persist version when returning true' do
+        stub(order).callback_before_version_save { true }
+        mock(order).persist_version
+        order.save
+      end
+    end
+
+    context 'after save' do
+      it 'should be triggered after successfully saving a version' do
+        mock(order).callback_after_version_save
+        order.save
+      end
+
+      it 'should not be triggered if saving fails' do
+        pending('Callback is still being called!')
+        dont_allow(order).callback_after_version_save
+        stub(order).persist_version { false }
+        order.save
+      end
+    end
+  end
 end

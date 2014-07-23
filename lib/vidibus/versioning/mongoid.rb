@@ -21,6 +21,8 @@ module Vidibus
         self.unversioned_attributes = %w[_id _type uuid updated_at created_at version_number version_updated_at]
         self.versioning_options = {}
 
+        define_model_callbacks :version_save
+
         # Returns the attributes that should be versioned.
         # If no versioned attributes have been defined on class level,
         # all attributes will be returned except the unversioned ones.
@@ -116,9 +118,16 @@ module Vidibus
 
       # Saves the record and handles version persistence.
       def save(*args)
-        return false if invalid?
-        saved = persist_version
-        (saved == nil) ? super(*args) : saved
+        saved = false
+        if valid?
+          run_callbacks(:version_save) do
+            saved = persist_version
+            if saved == nil
+              saved = super(*args)
+            end
+          end
+        end
+        saved
       end
 
       # Raises a validation error if saving fails.
