@@ -447,6 +447,44 @@ describe Vidibus::Versioning::Mongoid do
     end
   end
 
+  describe '#version_at' do
+    before do
+      stub_time('2014-11-07 10:00')
+      book
+      stub_time('2014-11-07 11:00')
+      book_with_two_versions
+      stub_time('2014-11-07 12:00')
+      book_with_three_versions
+    end
+
+    it 'should require an argument' do
+      expect { book.version_at }.to raise_error(ArgumentError)
+    end
+
+    it 'should require an argument that can be parsed as Time' do
+      expect {
+        book.version_at('whatever')
+      }.to raise_error(ArgumentError, 'no time information in "whatever"')
+    end
+
+    it 'should return the version at a given time string' do
+      version = book_with_three_versions.version_at('2014-11-07 11:00')
+      version.version_number.should eq(2)
+    end
+
+    it 'should return the version at a given time object' do
+      time = Time.parse('2014-11-07 10:59')
+      version = book_with_three_versions.version_at(time)
+      version.version_number.should eq(1)
+    end
+
+    it 'should raise an error if no version exists at given time' do
+      expect {
+        book_with_three_versions.version_at('2014-11-07 9:00')
+      }.to raise_error(Vidibus::Versioning::VersionNotFoundError)
+    end
+  end
+
   describe '#undo!' do
     it 'should call #version!(:previous) and #migrate!' do
       mock(book).version!(:previous)

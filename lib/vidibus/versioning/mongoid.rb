@@ -80,6 +80,20 @@ module Vidibus
         end
       end
 
+      # Returns version at given time.
+      #
+      def version_at(input)
+        input = Time.parse(input) unless input.is_a?(Time)
+        match = versions.
+          where(:created_at.lte => input).
+          desc(:created_at).first
+        if match
+          version(match.number)
+        else
+          raise VersionNotFoundError.new("no version at #{input}")
+        end
+      end
+
       # Applies attributes of wanted version on self.
       # Stores current attributes in a new version.
       def migrate!(number = nil)
