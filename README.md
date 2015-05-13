@@ -7,12 +7,12 @@ This gem is part of [Vidibus](http://vidibus.org), an open source toolset for bu
 
 ## Installation
 
-Add `gem "vidibus-versioning"` to your Gemfile. Then call `bundle install` on your console.
+Add `gem 'vidibus-versioning'` to your Gemfile. Then call `bundle install` on your console.
 
 
 ## Usage
 
-To apply versioning to your model is easy. An example:
+Applying versioning to your model is easy. An example:
 
 ```ruby
 class Article
@@ -20,17 +20,17 @@ class Article
   include Vidibus::Uuid::Mongoid
   include Vidibus::Versioning::Mongoid # this is mandatory
 
-  field :title, :type => String
-  field :text, :type => String
+  field :title, type: String
+  field :text, type: String
 
-  versioned :title, :text, :editing_time => 300 # this is optional
+  versioned :title, :text, editing_time: 300 # this is optional
 end
 ```
 
 ### Versioned attributes
 
 Including the versioning engine by adding `include Vidibus::Versioning::Mongoid` will set all fields of your model as
-versioned ones, except those contained in `Article.unversioned_attributes`, which are `_id`, `_type`, `uuid`,
+versioned ones, except those contained in `<Class>.unversioned_attributes`, which are `_id`, `_type`, `uuid`,
 `updated_at`, `created_at`, and `version_number`.
 
 An optional `versioned` call lets you specify the versioned attributes precisely by providing a list. For example, to
@@ -39,14 +39,14 @@ set the title as only attribute to be versioned, call `versioned :title`.
 
 ### Combined versioning
 
-`versioned` also takes options to tweak versioning behaviour. By calling `versioned :editing_time => 300` you set a
+`versioned` also takes options to tweak versioning behaviour. By calling `versioned editing_time: 300` you set a
 timespan for the version to accept changes so all changes within 300 seconds will be treated as one version.
 That behaviour is especially useful if your model's UI allows changing attributes separately, like in-place editing.
 
 
 ### Migrating
 
-The basic methods for migrating a versioned object - an article in this case - are:
+The basic methods for migrating a versioned object – an article in this case – are:
 
 ```ruby
 article.migrate!(32) # migrates to version 32
@@ -83,7 +83,7 @@ article.version?(3) # returns false if version 3 does not exist
 It is even possible to apply versioned attributes directly by adding them to the `version` call:
 
 ```ruby
-article.version(3, :title => "Wicked!") # returns version 3 with a new title applied
+article.version(3, title: 'Wicked!') # returns version 3 with a new title applied
 ```
 
 You may treat the article object with an applied version like the article itself. All changes will
@@ -93,10 +93,10 @@ that can be scheduled by [Vidibus::VersionScheduler](https://github.com/vidibus/
 A workflow example:
 
 ```ruby
-article = Article.create(:title => "Old shit")
+article = Article.create(title: 'Old stuff')
 future_article = article.version(:new)  # initialize a new version
 future_article.updated_at = 1.day.since # set a date in the future
-future_article.title = "New shit"       # set the new title
+future_article.title = 'New stuff'      # set the new title
 future_article.save                     # save the version
 ```
 
@@ -120,4 +120,4 @@ article.version_object            # => nil
 
 ## Copyright
 
-Copyright (c) 2011-2013 Andre Pankratz. See LICENSE for details.
+Copyright (c) 2011-2015 Andre Pankratz. See LICENSE for details.
