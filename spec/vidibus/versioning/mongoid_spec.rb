@@ -380,7 +380,7 @@ describe Vidibus::Versioning::Mongoid do
       it 'should store the attributes as new version' do
         book_with_two_versions.migrate!(1)
         book_with_two_versions.reload
-        book_with_two_versions.versions.should have(2).versions
+        book_with_two_versions.versions.count.should eq(2)
         book_with_two_versions.versions[1].
           versioned_attributes['title'].should eq('title 2')
         book_with_two_versions.versions[1].number.should eq(2)
@@ -400,9 +400,9 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should not create a new version object' do
-        book_with_two_versions.versions.should have(2).versions
+        book_with_two_versions.versions.count.should eq(2)
         book_with_two_versions.migrate!(:next)
-        book_with_two_versions.reload.versions.should have(2).versions
+        book_with_two_versions.reload.versions.count.should eq(2)
       end
 
       it 'should ensure that each version\'s creation time reflects the time of update' do
@@ -429,9 +429,9 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should create a new version object of the old version' do
-        book.versions.should have(1).version
+        book.versions.count.should eq(1)
         book.migrate!(:next)
-        book.versions.should have(2).versions
+        book.versions.count.should eq(2)
         book.versions.last.number.should eq(1)
         book.versions.last.versioned_attributes['title'].should eq('title 1')
       end
@@ -560,7 +560,7 @@ describe Vidibus::Versioning::Mongoid do
       book.version(:new).new_version?.should eq(true)
     end
 
-    it 'should return if version is the current one' do
+    it 'should return nil if version is the current one' do
       book.version(1).new_version?.should eq(false)
     end
 
@@ -782,7 +782,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should remove all versions of the record' do
         book_with_two_versions.delete
-        Vidibus::Versioning::Version.all.should have(:no).versions
+        Vidibus::Versioning::Version.all.count.should eq(0)
       end
     end
 
@@ -793,7 +793,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should delete the version' do
         version.delete
-        version.reload.versions.should have(1).version
+        version.reload.versions.count.should eq(1)
       end
 
       it 'should keep the versioned object if deleting fails' do
@@ -813,7 +813,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should remove all versions of the record' do
         book_with_two_versions.destroy
-        Vidibus::Versioning::Version.all.should have(:no).versions
+        Vidibus::Versioning::Version.all.count.should eq(0)
       end
     end
 
@@ -824,7 +824,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should destroy the version' do
         version.destroy
-        version.reload.versions.should have(1).version
+        version.reload.versions.count.should eq(1)
       end
 
       it 'should keep the versioned object if deleting fails' do

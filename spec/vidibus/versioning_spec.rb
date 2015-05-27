@@ -14,7 +14,7 @@ describe Vidibus::Versioning do
     end
 
     it 'should not create a version' do
-      book.versions.should have(:no).versions
+      book.versions.count.should eq(0)
     end
 
     it 'should set version number 1' do
@@ -44,7 +44,7 @@ describe Vidibus::Versioning do
       book
       stub_time('2011-01-01 02:00')
       book.update_attributes(:title => 'title 2')
-      book.reload.versions.should have(1).version
+      book.reload.versions.count.should eq(1)
       book.versions.first.created_at.should eq(past)
     end
 
@@ -53,7 +53,7 @@ describe Vidibus::Versioning do
       version = book.version(:next)
       version.update_attributes(:title => 'THE FUTURE!', :updated_at => future)
       book.reload
-      book.versions.should have(1).version
+      book.versions.count.should eq(1)
       book.versions.first.created_at.should eq(future)
     end
 
@@ -63,7 +63,7 @@ describe Vidibus::Versioning do
       end
 
       it 'should create the first version object' do
-        book.versions.should have(1).version
+        book.versions.count.should eq(1)
       end
 
       it 'should store the previous attributes as versioned ones' do
@@ -103,7 +103,7 @@ describe Vidibus::Versioning do
           end
 
           it 'should not create a version object' do
-            article.versions.should have(:no).versions
+            article.versions.count.should eq(0)
           end
         end
       end
@@ -131,7 +131,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should not create another version object' do
-              article.versions.should have(2).versions
+              article.versions.count.should eq(2)
             end
           end
 
@@ -147,7 +147,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should create a new version object' do
-              article.versions.should have(3).versions
+              article.versions.count.should eq(3)
             end
 
             it 'should store the previous attributes as versioned ones' do
@@ -174,7 +174,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should create a new version object' do
-              article.versions.should have(3).versions
+              article.versions.count.should eq(3)
             end
           end
 
@@ -185,7 +185,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should have 3 version objects' do
-              article.versions.should have(3).versions
+              article.versions.count.should eq(3)
             end
 
             context 'before editing time has passed' do
@@ -196,7 +196,7 @@ describe Vidibus::Versioning do
               end
 
               it 'should create another version object' do
-                article.versions.should have(4).versions
+                article.versions.count.should eq(4)
               end
             end
           end
@@ -226,7 +226,7 @@ describe Vidibus::Versioning do
 
             it 'should create a new version object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.versions.should have(2).versions
+              article.reload.versions.count.should eq(2)
             end
           end
 
@@ -242,7 +242,7 @@ describe Vidibus::Versioning do
 
             it 'should create a new version object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.versions.should have(2).versions
+              article.reload.versions.count.should eq(2)
             end
           end
         end
@@ -287,7 +287,7 @@ describe Vidibus::Versioning do
 
       it 'should not create an additional version' do
         book.version(1).update_attributes(:title => 'new title')
-        book.versions.should have(:no).versions
+        book.versions.count.should eq(0)
       end
     end
 
