@@ -55,17 +55,17 @@ describe Vidibus::Versioning::Version do
 
     it 'should be true if creation date is in the past' do
       subject.created_at = Time.now - 20000
-      subject.past?.should be_true
+      subject.past?.should eq(true)
     end
 
     it 'should be false if creation date is in the future' do
       subject.created_at = Time.now + 20000
-      subject.past?.should be_false
+      subject.past?.should eq(false)
     end
 
     it 'should be false if creation date has not been set' do
       subject.created_at = nil
-      subject.past?.should be_false
+      subject.past?.should eq(false)
     end
   end
 
@@ -78,17 +78,17 @@ describe Vidibus::Versioning::Version do
 
     it 'should be true if creation date is in the future' do
       subject.created_at = Time.now + 20000
-      subject.future?.should be_true
+      subject.future?.should eq(true)
     end
 
     it 'should be false if creation date is in the past' do
       subject.created_at = Time.now - 20000
-      subject.future?.should be_false
+      subject.future?.should eq(false)
     end
 
     it 'should be false if creation date has not been set' do
       subject.created_at = nil
-      subject.future?.should be_false
+      subject.future?.should eq(false)
     end
   end
 end

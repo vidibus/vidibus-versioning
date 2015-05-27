@@ -21,11 +21,11 @@ module Vidibus
       scope :timeline, desc(:created_at)
 
       def past?
-        created_at && created_at < Time.now
+        !!(created_at && created_at < Time.now)
       end
 
       def future?
-        created_at && created_at >= Time.now
+        !!(created_at && created_at >= Time.now)
       end
 
       protected

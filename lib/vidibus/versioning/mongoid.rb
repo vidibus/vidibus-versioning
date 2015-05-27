@@ -173,7 +173,7 @@ module Vidibus
 
       # Returns true if version requested is a new one.
       def new_version?
-        version_obj && version_obj.new_record?
+        !!(version_obj && version_obj.new_record?)
       end
 
       # Returns true if versioned attributes have changed.

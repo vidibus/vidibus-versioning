@@ -66,7 +66,7 @@ describe Vidibus::Versioning::Mongoid do
         :text => 'Call me Ishmael.',
         :published => true
       })
-      article.version(:previous).published.should be_true
+      article.version(:previous).published.should eq(true)
     end
 
     context 'without arguments' do
@@ -237,7 +237,7 @@ describe Vidibus::Versioning::Mongoid do
           version = book_with_two_versions.version(2, :title => 'new')
           version.version_number.should eq(2)
           version.title.should eq('new')
-          version.title_changed?.should be_true
+          version.title_changed?.should eq(true)
         end
       end
 
@@ -291,13 +291,13 @@ describe Vidibus::Versioning::Mongoid do
     context 'with a valid version number' do
       context 'on an object with versions' do
         it 'should return true' do
-          book_with_two_versions.version?(2).should be_true
+          book_with_two_versions.version?(2).should eq(true)
         end
       end
 
       context 'on an object without versions' do
         it 'should return true' do
-          book.version?(1).should be_true
+          book.version?(1).should eq(true)
         end
       end
     end
@@ -305,13 +305,13 @@ describe Vidibus::Versioning::Mongoid do
     context 'with an invalid version number' do
       context 'on an object with versions' do
         it 'should return false' do
-          book_with_two_versions.version?(3).should be_false
+          book_with_two_versions.version?(3).should eq(false)
         end
       end
 
       context 'on an object without versions' do
         it 'should return false' do
-          book.version?(2).should be_false
+          book.version?(2).should eq(false)
         end
       end
     end
@@ -557,15 +557,15 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#new_version?' do
     it 'should return true if version is a new one' do
-      book.version(:new).new_version?.should be_true
+      book.version(:new).new_version?.should eq(true)
     end
 
     it 'should return if version is the current one' do
-      book.version(1).new_version?.should be_false
+      book.version(1).new_version?.should eq(false)
     end
 
     it 'should return false if version already exists' do
-      book_with_two_versions.version(1).new_version?.should be_false
+      book_with_two_versions.version(1).new_version?.should eq(false)
     end
   end
 
@@ -617,14 +617,14 @@ describe Vidibus::Versioning::Mongoid do
 
       context 'without changes' do
         it 'should return true if saving succeeds' do
-          version.save.should be_true
+          version.save.should eq(true)
         end
       end
 
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should be_false
+          version.save.should eq(false)
         end
 
         it 'should not create a version object if the record is invalid' do
@@ -669,7 +669,7 @@ describe Vidibus::Versioning::Mongoid do
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should be_false
+          version.save.should eq(false)
         end
 
         it 'should not update the version object if the record is invalid' do
@@ -680,7 +680,7 @@ describe Vidibus::Versioning::Mongoid do
         end
 
         it 'should return true if saving succeeds' do
-          version.save.should be_true
+          version.save.should eq(true)
         end
 
         it 'should not update the versioned object' do
@@ -718,7 +718,7 @@ describe Vidibus::Versioning::Mongoid do
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should be_false
+          version.save.should eq(false)
         end
 
         it 'should not create a version object if the record is invalid' do
@@ -728,7 +728,7 @@ describe Vidibus::Versioning::Mongoid do
         end
 
         it 'should return true if saving succeeds' do
-          version.save.should be_true
+          version.save.should eq(true)
         end
 
         it 'should create a new version object' do

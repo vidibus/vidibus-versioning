@@ -269,11 +269,11 @@ describe Vidibus::Versioning do
       end
 
       it 'should return true like regular saving would' do
-        book.version(1).update_attributes(:title => 'new title').should be_true
+        book.version(1).update_attributes(:title => 'new title').should eq(true)
       end
 
       it 'should perform no update if validation fails' do
-        book.version(1).update_attributes(:title => nil).should be_false
+        book.version(1).update_attributes(:title => nil).should eq(false)
         book.reload.version(1).title.should eq('title 1')
       end
     end
