@@ -521,6 +521,20 @@ describe Vidibus::Versioning::Mongoid do
     end
   end
 
+  describe '#original_version_number' do
+    it 'should equal version number by default' do
+      book.original_version_number.should eq(1)
+    end
+
+    it 'should return the version number of the original object' do
+      book_with_two_versions.version(1).original_version_number.should eq(2)
+    end
+
+    it 'should return the version number of the original object on a new version' do
+      book_with_two_versions.version(:new).original_version_number.should eq(2)
+    end
+  end
+
   describe '#reload_version' do
     it 'should reload the object' do
       version = book_with_two_versions.version(1)

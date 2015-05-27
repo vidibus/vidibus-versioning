@@ -194,6 +194,11 @@ module Vidibus
         unversioned_changes.any?
       end
 
+      # Returns version number of original (unversioned) instance.
+      def original_version_number
+        version_cache.original_version_number || version_number
+      end
+
       protected
 
       # Applies version on self. Returns nil
@@ -208,7 +213,7 @@ module Vidibus
         unless version_obj
           raise VersionNotFoundError.new("version #{version_cache.wanted_version_number} does not exist")
         end
-
+        version_cache.original_version_number ||= version_number
         self.attributes = version_attributes
         self.version_number = version_cache.wanted_version_number
         if time = version_obj.created_at
@@ -329,6 +334,7 @@ module Vidibus
       def version_cache
         @version_cache ||= Struct.new(
           :wanted_version_number,
+          :original_version_number,
           :existing_version_wanted,
           :wanted_attributes,
           :new_version_number,
