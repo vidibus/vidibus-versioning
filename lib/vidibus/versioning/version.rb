@@ -13,10 +13,12 @@ module Vidibus
 
       index({versioned_uuid: 1, number: 1})
 
-      validates :versioned_uuid, :versioned_attributes, :presence => true
+      validates :versioned_uuid, :versioned_attributes, :number, :presence => true
+      validates :number, :uniqueness => {
+        :scope => [:versioned_id, :versioned_type]
+      }
 
-      before_validation :set_versioned_uuid
-      before_create :set_number
+      before_validation :set_number, :set_versioned_uuid
 
       scope :timeline, desc(:created_at)
 

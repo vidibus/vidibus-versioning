@@ -12,6 +12,31 @@ describe Vidibus::Versioning::Version do
     Vidibus::Versioning::Version.new
   end
 
+  describe 'validation' do
+    let(:subject) do
+      Vidibus::Versioning::Version.new.tap do |version|
+        version.versioned = book
+        version.versioned_attributes = book.attributes
+      end
+    end
+
+    it 'should pass with valid attributes' do
+      subject.should be_valid
+    end
+
+    it 'should fail without a number' do
+      stub(subject).number {}
+      subject.should be_invalid
+    end
+
+    it 'should fail without a unique version number' do
+      another = subject.clone
+      subject.save!
+      another.number = 1
+      another.should be_invalid
+    end
+  end
+
   describe '#number' do
     it 'should be nil by default' do
       subject.number.should be_nil
