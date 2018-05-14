@@ -483,6 +483,29 @@ describe Vidibus::Versioning::Mongoid do
         book_with_three_versions.version_at('2014-11-07 9:00')
       }.to raise_error(Vidibus::Versioning::VersionNotFoundError)
     end
+
+    it 'should return the current version if time matches' do
+      version = book_with_three_versions.version_at('2014-11-07 12:00')
+      version.version_number.should eq(3)
+    end
+
+    it 'should return a future version' do
+      book_with_three_versions.version(:next, title: 'future').tap do |v|
+        v.updated_at = Time.parse('2014-11-08 11:00')
+        v.save
+      end
+      version = book_with_three_versions.version_at('2014-11-08 11:00')
+      version.version_number.should eq(4)
+    end
+
+    it 'should return the last version matching given time' do
+      book_with_three_versions.version(:next, title: 'title 4').tap do |v|
+        v.updated_at = Time.parse('2014-11-07 11:00')
+        v.save
+      end
+      version = book_with_three_versions.version_at('2014-11-07 11:00')
+      version.version_number.should eq(4)
+    end
   end
 
   describe '#undo!' do

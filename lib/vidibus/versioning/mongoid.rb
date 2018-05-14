@@ -84,11 +84,20 @@ module Vidibus
       #
       def version_at(input)
         input = Time.parse(input) unless input.is_a?(Time)
+        current = updated_at <= input
         match = versions.
           where(:created_at.lte => input).
-          desc(:created_at).first
+          desc(:created_at).
+          desc(:number).
+          first
         if match
-          version(match.number)
+          if current && updated_at >= match.created_at
+            self
+          else
+            version(match.number)
+          end
+        elsif current
+          self
         else
           raise VersionNotFoundError.new("no version at #{input}")
         end
