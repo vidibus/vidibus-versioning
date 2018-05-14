@@ -9,6 +9,7 @@ require 'rubygems'
 require 'rspec'
 require 'rr'
 require 'vidibus-versioning'
+require 'database_cleaner'
 
 Dir['spec/support/**/*.rb'].each { |f| require f }
 
@@ -19,8 +20,19 @@ end
 
 RSpec.configure do |config|
   config.mock_with :rr
+  # config.before(:each) do
+  #   Mongoid::Sessions.default.collections.
+  #     select {|c| c.name !~ /system/}.each(&:drop)
+  # end
+  config.before(:suite) do
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
   config.before(:each) do
-    Mongoid::Sessions.default.collections.
-      select {|c| c.name !~ /system/}.each(&:drop)
+    DatabaseCleaner.start
+  end
+
+  config.after(:each) do
+    DatabaseCleaner.clean
   end
 end
